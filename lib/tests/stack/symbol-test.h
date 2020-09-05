@@ -5,5 +5,6 @@ void executeSymbolTests();
 
 void newSymbolWithInvalidNamesTest();
 void newSymbolTest();
+void extractSymbolTest();
 
 #endif

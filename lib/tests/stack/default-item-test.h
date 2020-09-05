@@ -5,5 +5,6 @@ void executeDefaultItemTests();
 
 void newDefaultItemWithInvalidNamesTest();
 void newDefaultItemTest();
+void extractDefaultItemTest();
 
 #endif

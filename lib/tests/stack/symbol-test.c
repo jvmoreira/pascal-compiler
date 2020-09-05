@@ -7,6 +7,7 @@
 void executeSymbolTests() {
   newSymbolTest();
   newSymbolWithInvalidNamesTest();
+  extractSymbolTest();
 }
 
 void newSymbolTest() {
@@ -25,4 +26,19 @@ void newSymbolWithInvalidNamesTest() {
 
   char invalidName[22] = { [0 ... 20] = 'a', '\0' };
   assert(newSymbol(invalidName) == NULL, "#newSymbol returns NULL when name is bigger than MAX_STR_LENGTH");
+}
+
+void extractSymbolTest() {
+  _StackItem item;
+  _DefaultItem content;
+  item.type = DEFAULT;
+  item.content.defaultItem = &content;
+
+  assert(extractSymbol(NULL) == NULL, "#extractSymbol returns NULL when item is NULL");
+  assert(extractSymbol(&item) == NULL, "#extractSymbol returns NULL when item has DEFAULT type");
+
+  _Symbol symbol;
+  item.type = SYMBOL;
+  item.content.symbol = &symbol;
+  assert(extractSymbol(&item) == &symbol, "#extractSymbol returns pointer to Symbol when item has SYMBOL type");
 }

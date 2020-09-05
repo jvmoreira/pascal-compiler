@@ -17,6 +17,13 @@ Symbol newSymbol(String name) {
   return symbol;
 }
 
+Symbol extractSymbol(StackItem item) {
+  if(!item || item->type != SYMBOL)
+    return NULL;
+
+  return item->content.symbol;
+}
+
 void destroySymbol(Symbol symbol) {
   free(symbol->name);
   free(symbol);

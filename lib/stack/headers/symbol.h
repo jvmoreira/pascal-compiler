@@ -3,6 +3,8 @@
 
 Symbol newSymbol(String name);
 
+Symbol extractSymbol(StackItem item);
+
 void destroySymbol(Symbol symbol);
 
 #endif

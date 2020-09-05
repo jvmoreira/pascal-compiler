@@ -7,6 +7,7 @@
 void executeDefaultItemTests() {
   newDefaultItemWithInvalidNamesTest();
   newDefaultItemTest();
+  extractDefaultItemTest();
 }
 
 void newDefaultItemTest() {
@@ -27,4 +28,19 @@ void newDefaultItemWithInvalidNamesTest() {
 
   char invalidName[22] = { [0 ... 20] = 'a', '\0' };
   assert(newDefaultItem(invalidName, 16) == NULL, "#newDefaultItem returns NULL when name is bigger than MAX_STR_LENGTH");
+}
+
+void extractDefaultItemTest() {
+  _StackItem item;
+  _Symbol symbol;
+  item.type = SYMBOL;
+  item.content.symbol = &symbol;
+
+  assert(extractDefaultItem(NULL) == NULL, "#extractDefaultItem returns NULL when item is NULL");
+  assert(extractDefaultItem(&item) == NULL, "#extractDefaultItem returns NULL when item has SYMBOL type");
+
+  _DefaultItem content;
+  item.type = DEFAULT;
+  item.content.defaultItem = &content;
+  assert(extractDefaultItem(&item) == &content, "#extractDefaultItem returns pointer to DefaultItem when item has DEFAULT type");
 }

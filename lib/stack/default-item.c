@@ -18,6 +18,13 @@ DefaultItem newDefaultItem(String name, int value) {
   return item;
 }
 
+DefaultItem extractDefaultItem(StackItem item) {
+  if(!item || item->type != DEFAULT)
+    return NULL;
+
+  return item->content.defaultItem;
+}
+
 void destroyDefaultItem(DefaultItem item) {
   free(item->name);
   free(item);
