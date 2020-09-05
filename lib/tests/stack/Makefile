@@ -6,10 +6,11 @@ LIBS_DIR = ../../
 
 TARGET = execute-tests
 
-FILES = $(TARGET)			\
-				../testCase		\
-				helpers-test		\
-				symbol-test
+FILES = $(TARGET)						\
+				../testCase					\
+				helpers-test				\
+				symbol-test   			\
+				default-item-test
 
 OBJECTS = $(addsuffix .o, $(FILES))
 
