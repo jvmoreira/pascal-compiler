@@ -10,7 +10,8 @@ FILES = $(TARGET)						\
 				../testCase					\
 				helpers-test				\
 				symbol-test   			\
-				default-item-test
+				default-item-test		\
+				stack-item-test
 
 OBJECTS = $(addsuffix .o, $(FILES))
 
