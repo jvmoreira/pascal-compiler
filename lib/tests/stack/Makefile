@@ -4,10 +4,12 @@ LDLIBS = -L $(LIBS_DIR) -l$(LIB)
 LIB = stack
 LIBS_DIR = ../../
 
-TARGET = executeTests
+TARGET = execute-tests
 
 FILES = $(TARGET)			\
-				../testCase
+				../testCase		\
+				helpers-test		\
+				symbol-test
 
 OBJECTS = $(addsuffix .o, $(FILES))
 
@@ -25,4 +27,4 @@ clean:
 	@rm -f $(OBJECTS)
 
 purge: clean
-	@rm $(TARGET)
+	@rm -f $(TARGET)

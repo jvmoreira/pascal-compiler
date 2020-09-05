@@ -7,4 +7,4 @@ all: $(TESTS)
 $(TESTS):
 	@make -C $@
 	@echo "\nRunning \`$@\` tests"
-	@./$@/executeTests
+	@./$@/execute-tests
