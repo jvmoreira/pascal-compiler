@@ -21,7 +21,7 @@ Symbol extractSymbol(StackItem item) {
   if(!item || item->type != SYMBOL)
     return NULL;
 
-  return item->content.symbol;
+  return item->symbol;
 }
 
 void destroySymbol(Symbol symbol) {

@@ -1,10 +1,10 @@
 #include "stack-models.h"
 #include "symbol.h"
-#include "default-item.h"
-#include "stack-item.h"
+#include "value.h"
+#include "item.h"
 #include "testCase.h"
 
-#include "stack-item-test.h"
+#include "item-test.h"
 
 void executeStackItemTests() {
   newStackItemTest();
@@ -12,16 +12,16 @@ void executeStackItemTests() {
 }
 
 void newStackItemTest() {
-  DefaultItem item = newDefaultItem("John", 16);
+  StackValue stackValue = newStackValue("John", 16);
 
-  StackItem stackItem = newStackItem(item);
+  StackItem item = newStackItem(stackValue);
 
-  assert(stackItem != NULL, "#newStackItem returns pointer to a StackItem");
-  assert(stackItem->type == DEFAULT, "#newStackItem creates item with correct type");
-  assert(extractDefaultItem(stackItem) == item, "#newStackItem creates item with correct content");
-  assert(stackItem->previous == NULL, "#newStackItem creates item with NULL previous pointer");
+  assert(item != NULL, "#newStackItem returns pointer to a StackItem");
+  assert(item->type == VALUE, "#newStackItem creates item with correct type");
+  assert(extractStackValue(item) == stackValue, "#newStackItem creates item with correct content");
+  assert(item->previous == NULL, "#newStackItem creates item with NULL previous pointer");
 
-  destroyStackItem(stackItem);
+  destroyStackItem(item);
 }
 
 void newSymbolStackItemTest() {

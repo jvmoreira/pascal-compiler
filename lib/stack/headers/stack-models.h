@@ -20,21 +20,18 @@ typedef _Symbol* Symbol;
 typedef struct {
   String name;
   int value;
-} _DefaultItem;
-typedef _DefaultItem* DefaultItem;
-
-typedef union {
-  Symbol symbol;
-  DefaultItem defaultItem;
-} _StackContent;
-typedef _StackContent* StackContent;
+} _StackValue;
+typedef _StackValue* StackValue;
 
 typedef enum {
-  DEFAULT, SYMBOL
+  VALUE, SYMBOL
 } StackType;
 
 typedef struct _StackItem {
-  _StackContent content;
+  union {
+    Symbol symbol;
+    StackValue value;
+  };
   StackType type;
   struct _StackItem *previous;
 } _StackItem;

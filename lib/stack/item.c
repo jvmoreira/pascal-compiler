@@ -2,9 +2,9 @@
 #include <string.h>
 
 #include "stack-models.h"
-#include "stack-item.h"
+#include "item.h"
 #include "symbol.h"
-#include "default-item.h"
+#include "value.h"
 
 StackItem newStackItemWithType(StackType type) {
   StackItem item = (StackItem) malloc(sizeof(_StackItem));
@@ -14,10 +14,10 @@ StackItem newStackItemWithType(StackType type) {
   return item;
 };
 
-StackItem newStackItem(DefaultItem defaultItem) {
-  StackItem item = newStackItemWithType(DEFAULT);
+StackItem newStackItem(StackValue stackValue) {
+  StackItem item = newStackItemWithType(VALUE);
 
-  item->content.defaultItem = defaultItem;
+  item->value = stackValue;
 
   return item;
 }
@@ -25,16 +25,16 @@ StackItem newStackItem(DefaultItem defaultItem) {
 StackItem newSymbolStackItem(Symbol symbol) {
   StackItem item = newStackItemWithType(SYMBOL);
 
-  item->content.symbol = symbol;
+  item->symbol = symbol;
 
   return item;
 }
 
 void destroyStackItem(StackItem item) {
   if(item->type == SYMBOL)
-    destroySymbol(item->content.symbol);
+    destroySymbol(item->symbol);
   else
-    destroyDefaultItem(item->content.defaultItem);
+    destroyStackValue(item->value);
 
   free(item);
 }

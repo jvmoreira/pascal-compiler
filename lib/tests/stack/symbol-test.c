@@ -30,15 +30,15 @@ void newSymbolWithInvalidNamesTest() {
 
 void extractSymbolTest() {
   _StackItem item;
-  _DefaultItem content;
-  item.type = DEFAULT;
-  item.content.defaultItem = &content;
+  _StackValue stackValue;
+  item.type = VALUE;
+  item.value = &stackValue;
 
   assert(extractSymbol(NULL) == NULL, "#extractSymbol returns NULL when item is NULL");
-  assert(extractSymbol(&item) == NULL, "#extractSymbol returns NULL when item has DEFAULT type");
+  assert(extractSymbol(&item) == NULL, "#extractSymbol returns NULL when item has VALUE type");
 
   _Symbol symbol;
   item.type = SYMBOL;
-  item.content.symbol = &symbol;
+  item.symbol = &symbol;
   assert(extractSymbol(&item) == &symbol, "#extractSymbol returns pointer to Symbol when item has SYMBOL type");
 }

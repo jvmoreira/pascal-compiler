@@ -9,6 +9,7 @@ all: $(LIBS)
 $(LIBS):
 	@make -C $@
 	@ar rcs lib$@.a $(LIB_OBJS)
+	@make clean -C $@
 
 clean:
 	@echo Cleaning static libraries...

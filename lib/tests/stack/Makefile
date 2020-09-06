@@ -1,8 +1,8 @@
-CFLAGS = -Wall -Wextra -I ./ -I ../ -I ../../stack/headers
-LDLIBS = -L $(LIBS_DIR) -l$(LIB)
-
 LIB = stack
 LIBS_DIR = ../../
+CFLAGS = -Wall -Wextra -I ./ -I ../ -I ../../$(LIB)/headers
+LDLIBS = -L $(LIBS_DIR) -l$(LIB)
+
 
 TARGET = execute-tests
 
@@ -10,8 +10,8 @@ FILES = $(TARGET)						\
 				../testCase					\
 				helpers-test				\
 				symbol-test   			\
-				default-item-test		\
-				stack-item-test
+				value-test					\
+				item-test
 
 OBJECTS = $(addsuffix .o, $(FILES))
 
@@ -20,7 +20,7 @@ OBJECTS = $(addsuffix .o, $(FILES))
 all: lib $(TARGET)
 
 lib:
-	@make $(LIB) -C $(LIBS_DIR) -s
+	@make $(LIB) -C $(LIBS_DIR)
 
 $(TARGET): $(OBJECTS)
 

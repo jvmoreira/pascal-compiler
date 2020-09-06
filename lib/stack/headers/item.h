@@ -1,7 +1,7 @@
 #ifndef __STACK_ITEM__
 #define __STACK_ITEM__
 
-StackItem newStackItem(DefaultItem defaultItem);
+StackItem newStackItem(StackValue stackValue);
 
 StackItem newSymbolStackItem(Symbol symbol);
 
