@@ -4,5 +4,6 @@
 void executeStackItemTests();
 
 void newStackItemTest();
+void newSymbolStackItemTest();
 
 #endif
