@@ -5,4 +5,6 @@ void executeHelpersTests();
 
 void invalidNameTest();
 
+void emptyStackTest();
+
 #endif

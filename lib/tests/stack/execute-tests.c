@@ -3,6 +3,7 @@
 #include "symbol-test.h"
 #include "value-test.h"
 #include "item-test.h"
+#include "stack-test.h"
 
 int main() {
 
@@ -10,6 +11,7 @@ int main() {
   executeSymbolTests();
   executeStackValueTests();
   executeStackItemTests();
+  executeStackTests();
 
   printTestCaseResults();
 

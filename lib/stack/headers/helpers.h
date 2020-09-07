@@ -3,4 +3,6 @@
 
 int invalidName(String name);
 
+int emptyStack(Stack stack);
+
 #endif

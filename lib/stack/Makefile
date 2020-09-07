@@ -3,7 +3,8 @@ CFLAGS = -Wall -Wextra -Werror -I headers
 FILES =	helpers				\
 				symbol				\
 				value					\
-				item
+				item					\
+				stack
 
 OBJECTS = $(addsuffix .o, $(FILES))
 

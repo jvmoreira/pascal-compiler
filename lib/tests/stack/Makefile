@@ -11,7 +11,8 @@ FILES = $(TARGET)						\
 				helpers-test				\
 				symbol-test   			\
 				value-test					\
-				item-test
+				item-test						\
+				stack-test
 
 OBJECTS = $(addsuffix .o, $(FILES))
 
