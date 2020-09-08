@@ -3,6 +3,7 @@
 
 #include "stack-models.h"
 #include "value.h"
+#include "stack.h"
 #include "helpers.h"
 
 StackValue newStackValue(String name, int value) {
@@ -25,7 +26,20 @@ StackValue extractStackValue(StackItem item) {
   return item->value;
 }
 
+StackValue stackPopValue(Stack stack) {
+  if(!isValueStack(stack))
+    return NULL;
+
+  StackItem item = stackPop(stack);
+  StackValue value = extractStackValue(item);
+  free(item);
+
+  return value;
+}
+
 void destroyStackValue(StackValue stackValue) {
+  if(!stackValue)
+    return;
   free(stackValue->name);
   free(stackValue);
 }

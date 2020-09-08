@@ -1,5 +1,8 @@
 #include "stack-models.h"
 #include "symbol.h"
+#include "value.h"
+#include "stack.h"
+#include "helpers.h"
 #include "testCase.h"
 
 #include "symbol-test.h"
@@ -8,6 +11,7 @@ void executeSymbolTests() {
   newSymbolTest();
   newSymbolWithInvalidNamesTest();
   extractSymbolTest();
+  stackPopSymbolTest();
 }
 
 void newSymbolTest() {
@@ -41,4 +45,38 @@ void extractSymbolTest() {
   item.type = SYMBOL;
   item.symbol = &symbol;
   assert(extractSymbol(&item) == &symbol, "#extractSymbol returns pointer to Symbol when item has SYMBOL type");
+}
+
+void stackPopSymbolTest() {
+  Stack stack = newStackWithType(VALUE);
+  stackInsertValue(stack, newStackValue("value", 16));
+
+  assert(stackPopSymbol(NULL) == NULL, "#stackPopSymbol returns NULL when stack is NULL");
+  assert(!emptyStack(stack) && stackPopSymbol(stack) == NULL, "#stackPopSymbol returns NULL when stack has VALUE type");
+  destroyStack(stack);
+
+  stack = newStackWithType(SYMBOL);
+  assert(stackPopSymbol(stack) == NULL, "#stackPopSymbol returns NULL when stack is empty");
+
+  int stackSize = 2;
+  Symbol symbols[2];
+  for(int i = 0; i < stackSize; ++i) {
+    symbols[i] = newSymbol("symbol");
+    stackInsertSymbol(stack, symbols[i]);
+  }
+
+  for(int i = stackSize - 1; i >= 0; --i) {
+    int previousLength = stack->length;
+    StackItem topPrevious = stack->top->previous;
+
+    Symbol poppedSymbol = stackPopSymbol(stack);
+
+    assert(poppedSymbol == symbols[i], "#stackPopSymbol returns last Symbol inserted");
+    assert(stack->top == topPrevious, "#stackPopSymbol sets stack->top correctly");
+    assert(stack->length == previousLength - 1, "#stackPopSymbol decrements stack->length correctly");
+
+    destroySymbol(poppedSymbol);
+  }
+  assert(emptyStack(stack), "#stackPopSymbol lefts stack empty after popping all items");
+  destroyStack(stack);
 }

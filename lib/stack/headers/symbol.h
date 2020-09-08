@@ -5,6 +5,8 @@ Symbol newSymbol(String name);
 
 Symbol extractSymbol(StackItem item);
 
+Symbol stackPopSymbol(Stack stack);
+
 void destroySymbol(Symbol symbol);
 
 #endif

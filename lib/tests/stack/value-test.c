@@ -1,5 +1,8 @@
 #include "stack-models.h"
 #include "value.h"
+#include "symbol.h"
+#include "stack.h"
+#include "helpers.h"
 #include "testCase.h"
 
 #include "value-test.h"
@@ -8,6 +11,7 @@ void executeStackValueTests() {
   newStackValueWithInvalidNamesTest();
   newStackValueTest();
   extractStackValueTest();
+  stackPopValueTest();
 }
 
 void newStackValueTest() {
@@ -43,4 +47,38 @@ void extractStackValueTest() {
   item.type = VALUE;
   item.value = &stackValue;
   assert(extractStackValue(&item) == &stackValue, "#extractStackValue returns pointer to StackValue when item has VALUE type");
+}
+
+void stackPopValueTest() {
+  Stack stack = newStackWithType(SYMBOL);
+  stackInsertSymbol(stack, newSymbol("symbol"));
+
+  assert(stackPopValue(NULL) == NULL, "#stackPopValue returns NULL when stack is NULL");
+  assert(!emptyStack(stack) && stackPopValue(stack) == NULL, "#stackPopValue returns NULL when stack has SYMBOL type");
+  destroyStack(stack);
+
+  stack = newStackWithType(VALUE);
+  assert(stackPopValue(stack) == NULL, "#stackPopValue returns NULL when stack is empty");
+
+  int stackSize = 2;
+  StackValue values[2];
+  for(int i = 0; i < stackSize; ++i) {
+    values[i] = newStackValue("value", i);
+    stackInsertValue(stack, values[i]);
+  }
+
+  for(int i = stackSize - 1; i >= 0; --i) {
+    int previousLength = stack->length;
+    StackItem topPrevious = stack->top->previous;
+
+    StackValue poppedValue = stackPopValue(stack);
+
+    assert(poppedValue == values[i], "#stackPopValue returns last StackValue inserted");
+    assert(stack->top == topPrevious, "#stackPopValue sets stack->top correctly");
+    assert(stack->length == previousLength - 1, "#stackPopValue decrements stack->length correctly");
+
+    destroyStackValue(poppedValue);
+  }
+  assert(emptyStack(stack), "#stackPopValue lefts stack empty after popping all items");
+  destroyStack(stack);
 }

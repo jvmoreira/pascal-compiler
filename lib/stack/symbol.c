@@ -3,6 +3,7 @@
 
 #include "stack-models.h"
 #include "symbol.h"
+#include "stack.h"
 #include "helpers.h"
 
 Symbol newSymbol(String name) {
@@ -24,7 +25,20 @@ Symbol extractSymbol(StackItem item) {
   return item->symbol;
 }
 
+Symbol stackPopSymbol(Stack stack) {
+  if(!isSymbolStack(stack))
+    return NULL;
+
+  StackItem item = stackPop(stack);
+  Symbol symbol = extractSymbol(item);
+  free(item);
+
+  return symbol;
+}
+
 void destroySymbol(Symbol symbol) {
+  if(!symbol)
+    return;
   free(symbol->name);
   free(symbol);
 }

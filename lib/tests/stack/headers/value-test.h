@@ -6,5 +6,6 @@ void executeStackValueTests();
 void newStackValueWithInvalidNamesTest();
 void newStackValueTest();
 void extractStackValueTest();
+void stackPopValueTest();
 
 #endif

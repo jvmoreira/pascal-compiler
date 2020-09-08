@@ -5,6 +5,8 @@ StackValue newStackValue(String name, int value);
 
 StackValue extractStackValue(StackItem item);
 
+StackValue stackPopValue(Stack stack);
+
 void destroyStackValue(StackValue stackValue);
 
 #endif
