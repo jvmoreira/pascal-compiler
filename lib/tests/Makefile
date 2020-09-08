@@ -6,6 +6,5 @@ all: $(TESTS)
 
 $(TESTS):
 	@make -C $@
-	@make clean -C $@
 	@echo "\nRunning \`$@\` tests"
 	@./$@/execute-tests

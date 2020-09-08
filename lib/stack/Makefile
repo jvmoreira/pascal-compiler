@@ -1,5 +1,7 @@
 CFLAGS = -Wall -Wextra -Werror -I headers
 
+LIB_PATH = ../libstack.a
+
 FILES =	helpers				\
 				symbol				\
 				value					\
@@ -8,10 +10,14 @@ FILES =	helpers				\
 
 OBJECTS = $(addsuffix .o, $(FILES))
 
-.PHONY: all
+.PHONY: all clean
 
-all: $(OBJECTS)
+all: $(OBJECTS) $(LIB_PATH)( $(OBJECTS) )
 
 clean:
 	@echo Cleaning object files...
 	@-rm -f $(OBJECTS)
+
+purge: clean
+	@echo Deleting static library...
+	@rm -f $(LIB_PATH)
