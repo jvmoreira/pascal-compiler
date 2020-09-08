@@ -85,14 +85,23 @@ void stackPopTest() {
   assert(stackPop(NULL) == NULL, "#stackPop returns NULL when stack is NULL");
   assert(stackPop(stack) == NULL, "#stackPop returns NULL when stack is empty");
 
-  _StackItem item;
-  item.previous = NULL;
-  stack->top = &item;
-  stack->length = 1;
-  StackItem poppedItem = stackPop(stack);
+  Symbol symbols[2] = { newSymbol("firstSymbol"), newSymbol("lastSymbol") };
+  stackInsertSymbol(stack, symbols[0]);
+  stackInsertSymbol(stack, symbols[1]);
 
-  assert(poppedItem == &item, "#stackPop returns last item inserted");
+  for(int i = 1; i >= 0; --i) {
+    int previousLength = stack->length;
+    StackItem topPrevious = stack->top->previous;
+
+    StackItem poppedItem = stackPop(stack);
+    int itemWasPopped = (poppedItem != NULL) && (extractSymbol(poppedItem) == symbols[i]);
+
+    assert(itemWasPopped, "#stackPop returns last item inserted");
+    assert(stack->top == topPrevious, "#stackPop decrements stack->length correctly");
+    assert(stack->length == previousLength - 1, "#stackPop decrements stack->length correctly");
+
+    destroyStackItem(poppedItem);
+  }
   assert(emptyStack(stack), "#stackPop lefts stack empty after popping all items");
-
   destroyStack(stack);
 }
