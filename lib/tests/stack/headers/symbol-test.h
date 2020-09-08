@@ -6,6 +6,7 @@ void executeSymbolTests();
 void newSymbolWithInvalidNamesTest();
 void newSymbolTest();
 void extractSymbolTest();
+void stackSearchSymbolTest();
 void stackPopSymbolTest();
 
 #endif

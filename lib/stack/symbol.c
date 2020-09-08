@@ -25,6 +25,26 @@ Symbol extractSymbol(StackItem item) {
   return item->symbol;
 }
 
+int itemMatchName(StackItem item, String name) {
+  if(item->type != SYMBOL)
+    return 0;
+
+  Symbol symbol = extractSymbol(item);
+  String symbolName = symbol ? symbol->name : NULL;
+  return !symbolName ? 0 : strcmp(name, symbolName) == 0;
+}
+
+Symbol stackSearchSymbol(Stack stack, String targetName) {
+  if(emptyStack(stack) || !isSymbolStack(stack) || invalidName(targetName))
+    return NULL;
+
+  StackItem item = stack->top;
+  while(item && !itemMatchName(item, targetName))
+    item = item->previous;
+
+  return extractSymbol(item);
+}
+
 Symbol stackPopSymbol(Stack stack) {
   if(!isSymbolStack(stack))
     return NULL;

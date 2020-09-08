@@ -11,6 +11,7 @@ void executeSymbolTests() {
   newSymbolTest();
   newSymbolWithInvalidNamesTest();
   extractSymbolTest();
+  stackSearchSymbolTest();
   stackPopSymbolTest();
 }
 
@@ -45,6 +46,26 @@ void extractSymbolTest() {
   item.type = SYMBOL;
   item.symbol = &symbol;
   assert(extractSymbol(&item) == &symbol, "#extractSymbol returns pointer to Symbol when item has SYMBOL type");
+}
+
+void stackSearchSymbolTest() {
+  Stack stack = newStackWithType(SYMBOL);
+  assert(stackSearchSymbol(NULL, "target") == NULL, "#stackSearchSymbol returns NULL when stack is NULL");
+  assert(stackSearchSymbol(stack, "target") == NULL, "#stackSearchSymbol returns NULL when stack is empty");
+
+  String names[5] = { "name", "address", "age", "address", "phone" };
+  Symbol symbols[5];
+  for(int i = 0; i < 5; ++i) {
+    symbols[i] = newSymbol(names[i]);
+    stackInsertSymbol(stack, symbols[i]);
+  }
+
+  assert(stackSearchSymbol(stack, NULL) == NULL, "#stackSearchSymbol returns NULL when targetName is NULL");
+  assert(stackSearchSymbol(stack, "height") == NULL, "#stackSearchSymbol returns NULL when target does not exist");
+  assert(stackSearchSymbol(stack, "name") == symbols[0], "#stackSearchSymbol returns the matched `name` item");
+  assert(stackSearchSymbol(stack, "address") == symbols[3], "#stackSearchSymbol finds the latest `address` inserted");
+
+  destroyStack(stack);
 }
 
 void stackPopSymbolTest() {
