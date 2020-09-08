@@ -3,6 +3,10 @@
 
 int invalidName(String name);
 
+int isValueStack(Stack stack);
+
+int isSymbolStack(Stack stack);
+
 int emptyStack(Stack stack);
 
 #endif

@@ -3,6 +3,10 @@
 
 Stack newStackWithType(StackType type);
 
+void stackInsertValue(Stack stack, StackValue stackValue);
+
+void stackInsertSymbol(Stack stack, Symbol symbol);
+
 StackItem stackPop(Stack stack);
 
 void destroyStack(Stack stack);

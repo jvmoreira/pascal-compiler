@@ -4,6 +4,8 @@
 void executeStackTests();
 
 void newStackWithTypeTest();
+void stackInsertValueTest();
+void stackInsertSymbolTest();
 void stackPopTest();
 
 #endif

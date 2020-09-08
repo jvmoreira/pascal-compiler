@@ -15,6 +15,30 @@ Stack newStackWithType(StackType type) {
   return stack;
 }
 
+void stackInsert(Stack stack, StackItem item) {
+  item->previous = stack->top;
+  stack->top = item;
+  stack->length++;
+}
+
+void stackInsertValue(Stack stack, StackValue stackValue) {
+  if(!isValueStack(stack) || !stackValue)
+    return;
+
+  StackItem item = newStackItem(stackValue);
+
+  stackInsert(stack, item);
+}
+
+void stackInsertSymbol(Stack stack, Symbol symbol) {
+  if(!isSymbolStack(stack) || !symbol)
+    return;
+
+  StackItem item = newSymbolStackItem(symbol);
+
+  stackInsert(stack, item);
+}
+
 StackItem stackPop(Stack stack) {
   if(emptyStack(stack))
     return NULL;

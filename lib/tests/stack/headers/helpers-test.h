@@ -4,7 +4,8 @@
 void executeHelpersTests();
 
 void invalidNameTest();
-
+void isValueStackTest();
+void isSybmolStackTest();
 void emptyStackTest();
 
 #endif

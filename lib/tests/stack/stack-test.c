@@ -1,6 +1,8 @@
 #include "stack-models.h"
 #include "stack.h"
 #include "item.h"
+#include "value.h"
+#include "symbol.h"
 #include "helpers.h"
 #include "testCase.h"
 
@@ -8,6 +10,8 @@
 
 void executeStackTests() {
   newStackWithTypeTest();
+  stackInsertValueTest();
+  stackInsertSymbolTest();
   stackPopTest();
 }
 
@@ -25,6 +29,54 @@ void newStackWithTypeTest() {
 
     destroyStack(stack);
   }
+}
+
+void stackInsertValueTest() {
+  _StackValue value;
+  Stack stack = newStackWithType(SYMBOL);
+
+  stackInsertValue(stack, &value);
+  assert(emptyStack(stack), "#stackInsertValue does nothing when stack has type SYMBOL");
+  destroyStack(stack);
+
+  stack = newStackWithType(VALUE);
+  for(int i = 0; i < 2; ++i) {
+    StackItem previousTop = stack->top;
+    int previousLength = stack->length;
+    StackValue value = newStackValue("value", i);
+
+    stackInsertValue(stack, value);
+    int valueWasInserted = (stack->top != NULL) && (stack->top->type == VALUE) && (extractStackValue(stack->top) == value);
+
+    assert(valueWasInserted, "#stackInsertValue inserts item with correct StackValue on stack->top");
+    assert(stack->top->previous == previousTop, "#stackInsertValue sets stack->top->previous correctly");
+    assert(stack->length == previousLength + 1, "#stackInsertValue increments stack->length correctly");
+  }
+  destroyStack(stack);
+}
+
+void stackInsertSymbolTest() {
+  _Symbol symbol;
+  Stack stack = newStackWithType(VALUE);
+
+  stackInsertSymbol(stack, &symbol);
+  assert(emptyStack(stack), "#stackInsertSymbol does nothing when stack has type VALUE");
+  destroyStack(stack);
+
+  stack = newStackWithType(SYMBOL);
+  for(int i = 0; i < 2; ++i) {
+    StackItem previousTop = stack->top;
+    int previousLength = stack->length;
+    Symbol symbol = newSymbol("symbol");
+
+    stackInsertSymbol(stack, symbol);
+    int symbolWasInserted = (stack->top != NULL) && (stack->top->type == SYMBOL) && (extractSymbol(stack->top) == symbol);
+
+    assert(symbolWasInserted, "#stackInsertSymbol inserts item with correct Symbol on stack->top");
+    assert(stack->top->previous == previousTop, "#stackInsertSymbol sets stack->top->previous correctly");
+    assert(stack->length == previousLength + 1, "#stackInsertSymbol increments stack->length correctly");
+  }
+  destroyStack(stack);
 }
 
 void stackPopTest() {
