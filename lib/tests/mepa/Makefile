@@ -1,19 +1,14 @@
-LIB = stack
+LIB = mepa
 LIBS_DIR = ../../
 CFLAGS = -Wall -Wextra -I ./headers -I ../ -I ../../$(LIB)/headers
 LDFLAGS = -L $(LIBS_DIR)
 LDLIBS = -l$(LIB)
 
-
 TARGET = execute-tests
 
 FILES = $(TARGET)						\
 				../testCase					\
-				helpers-test				\
-				symbol-test   			\
-				value-test					\
-				item-test						\
-				stack-test
+				setup-test
 
 OBJECTS = $(addsuffix .o, $(FILES))
 

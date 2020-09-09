@@ -1,12 +1,8 @@
 CFLAGS = -Wall -Wextra -Werror -I headers
 
-LIB_PATH = ../libstack.a
+LIB_PATH = ../libmepa.a
 
-FILES =	helpers				\
-				symbol				\
-				value					\
-				item					\
-				stack
+FILES =	setup
 
 OBJECTS = $(addsuffix .o, $(FILES))
 

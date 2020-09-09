@@ -1,13 +1,18 @@
-LIBS = stack
+LIBS =  stack			\
+				mepa
 
-.PHONY: all stack
+CLEAN = $(addprefix clean_, $(LIBS))
+
+.PHONY: all $(LIBS)
 
 all: $(LIBS)
 
 $(LIBS):
 	@make -C $@
 
-clean:
+clean: $(CLEAN)
 	@echo Cleaning static libraries...
 	@rm -f *.a
-	@make clean -C $(LIBS)
+
+$(CLEAN):
+	@make clean -C $(subst clean_, , $@)
