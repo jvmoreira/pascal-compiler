@@ -1,6 +1,6 @@
 LIB = stack
-LIBS_DIR = ../../
-CFLAGS = -Wall -Wextra -I ./headers -I ../ -I ../../$(LIB)/headers
+LIBS_DIR = ../../lib
+CFLAGS = -Wall -Wextra -I ./headers -I ../ -I $(LIBS_DIR)/$(LIB)/headers
 LDFLAGS = -L $(LIBS_DIR)
 LDLIBS = -l$(LIB)
 
