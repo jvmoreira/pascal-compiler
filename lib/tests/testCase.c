@@ -4,6 +4,7 @@
 #define SUCCESS_COLOR "1;32m"
 
 int errorCount = 0;
+int mallocCount = 0;
 
 void setErrorMode() {
 	printf("\x1b[%s", ERROR_COLOR);
@@ -18,28 +19,31 @@ void resetColorMode() {
 }
 
 void context(const char *context) {
-  printf("\n\n\t%s\n========================================\n", context);
+  printf("\n\t%s\n", context);
 }
 
 void assert(int expression, const char* message) {
-  if(expression == 0) {
-    errorCount++;
-    setErrorMode();
-    printf("ERROR:\t");
-  }
+  if(expression != 0)
+    return;
 
-  printf("%s --> %i\n", message, expression);
+  errorCount++;
+  setErrorMode();
+  printf("ERROR:\t%s\n", message);
   resetColorMode();
 }
 
 void printTestCaseResults() {
+  assert(!mallocCount, "The number of calls for malloc should be equal to the number of calls of free");
+
   if(errorCount > 0) {
     setErrorMode();
-    printf("\n\nTest suite failed: %i error%c found.\n\n", errorCount, (errorCount > 1 ? 's' : '\0'));
-    resetColorMode();
-  } else {
+    char plural = (errorCount > 1 ? 's' : '\0');
+    printf("\nTest suite failed: %i error%c found.\n\n", errorCount, plural);
+  }
+  else {
 		setSuccessMode();
-		printf("\n\nTest suite succeeded.\n\n");
-		resetColorMode();
+		printf("Test suite succeeded.\n\n");
 	}
+
+		resetColorMode();
 }
