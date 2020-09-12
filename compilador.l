@@ -1,12 +1,11 @@
 %{
 
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "helpers.h"
+#include "libmepa.h"
 #include "compilador.tab.h"
 
-//#define IMPRIME(STR) {};
 #define IMPRIME(STR) printf("%s    # %s \n", STR, token);
 
 int nl = 1;
@@ -17,11 +16,14 @@ pulo_linha [\n]
 
 descarte [\t ]+
 
-ident [a-zAZ][a-zAZ1-9]*
+ident [a-zA-Z][a-zA-Z1-9]*
 
 numero [0-9]+
 
 comentario "(*".*"*)"
+
+%option nounput
+%option noinput
 
 %%
 

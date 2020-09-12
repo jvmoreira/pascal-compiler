@@ -11,10 +11,15 @@ typedef enum {
   s_fecha_parenteses, s_identificador
 } Simbolos;
 
-extern Simbolos simbolo, relacao;
 extern char token[TAM_TOKEN];
-extern int nivel_lexico;
-extern int desloc;
-extern int nl;
+extern Simbolos simbolo, relacao;
+
+void iniciaCompilador();
+
+void iniciaPilhas();
+
+void geraCodigo(char* comando);
+void geraCodigoComRotulo(char* comando, char* rotulo);
+int geraErro(char* erro);
 
 #endif

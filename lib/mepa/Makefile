@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wextra -Werror -I headers
+CFLAGS = -Wall -Wextra -Werror -I headers -I ../include
 
 LIB_PATH = ../libmepa.a
 

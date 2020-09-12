@@ -1,19 +1,30 @@
+LDFLAGS = -L lib
+CFLAGS = -Wall -I lib/include
+LDLIBS = -ll -ly -lc -lmepa -lstack
+
 $DEPURA=1
 
-compilador: lex.yy.c y.tab.c helpers.o helpers.h
-	gcc lex.yy.c compilador.tab.c helpers.o -o compilador -ll -ly -lc
+TARGET = compilador
 
-lex.yy.c: compilador.l helpers.h
+.PHONY: all libs clean
+
+all: $(TARGET)
+
+$(TARGET): libs lex.yy.c y.tab.c
+	gcc $(CFLAGS) $(LDFLAGS) lex.yy.c compilador.tab.c -o compilador $(LDLIBS)
+
+libs:
+	@make -C lib
+
+lex.yy.c: compilador.l
 	flex compilador.l
 
-y.tab.c: compilador.y helpers.h
+y.tab.c: compilador.y
 	bison compilador.y -d -v
 
-compilador.o : helpers.h compiladorF.c
-	gcc -c helpers.c -o helpers.o
+clean:
+	@echo Cleaning files...
+	@rm -f compilador.tab.* lex.yy.c compilador.output
 
-helpers: helpers.c helpers.h
-	gcc -Wall helpers.c -o helpers && ./helpers
-
-clean :
-	rm -f compilador.tab.* lex.yy.c compilador.o compilador.output
+purge: clean
+	@rm -f $(TARGET)
