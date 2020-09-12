@@ -1,10 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stack-models.h"
-#include "symbol.h"
-#include "stack.h"
-#include "helpers.h"
+#include "libstack.h"
 
 Symbol newSymbol(String name) {
   if(invalidName(name))

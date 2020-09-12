@@ -1,10 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stack-models.h"
-#include "value.h"
-#include "stack.h"
-#include "helpers.h"
+#include "libstack.h"
 
 StackValue newStackValue(String name, int value) {
   if(invalidName(name))

@@ -1,10 +1,6 @@
 #include <stdlib.h>
-#include <string.h>
 
-#include "stack-models.h"
-#include "item.h"
-#include "symbol.h"
-#include "value.h"
+#include "libstack.h"
 
 StackItem newStackItemWithType(StackType type) {
   StackItem item = (StackItem) malloc(sizeof(_StackItem));

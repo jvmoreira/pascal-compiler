@@ -1,7 +1,6 @@
 #include <string.h>
 
-#include "stack-models.h"
-#include "helpers.h"
+#include "libstack.h"
 
 int invalidName(String name) {
   return !name || !strlen(name) || (strlen(name) > MAX_STR_LEN);

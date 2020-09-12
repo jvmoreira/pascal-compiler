@@ -1,5 +1,5 @@
-#ifndef __STACK_MODELS__
-#define __STACK_MODELS__
+#ifndef __STACK_TYPES__
+#define __STACK_TYPES__
 
 #define MAX_STR_LEN 20
 

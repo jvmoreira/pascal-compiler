@@ -1,9 +1,6 @@
 #include <stdlib.h>
 
-#include "stack-models.h"
-#include "stack.h"
-#include "item.h"
-#include "helpers.h"
+#include "libstack.h"
 
 Stack newStackWithType(StackType type) {
   Stack stack = (Stack) malloc(sizeof(_Stack));
