@@ -6,11 +6,11 @@
 #include "libmepa.h"
 #include "compilador.tab.h"
 
+#if DEBUG >= 5
 #define IMPRIME(STR) printf("%s    # %s \n", STR, token);
-
-int linhaAtual = 1;
-Simbolos simbolo, relacao;
-char token[TAM_TOKEN];
+#else
+#define IMPRIME(STR)
+#endif
 
 %}
 
@@ -29,13 +29,13 @@ comentario "(*".*"*)"
 
 %%
 
-{pulo_linha} {linhaAtual++;}
+{pulo_linha} {novaLinha();}
 
 {descarte}
 
 {comentario}
 
-program { simbolo  = s_program;
+program { simbolo = s_program;
           strncpy(token, yytext, TAM_TOKEN);
           IMPRIME("program ");
           return PROGRAM;
@@ -43,8 +43,22 @@ program { simbolo  = s_program;
 
 var     { simbolo = s_var;
           strncpy(token, yytext, TAM_TOKEN);
-          IMPRIME("var  ");
+          IMPRIME("var ");
           return VAR;
+}
+
+integer {
+  simbolo = s_integer;
+  strncpy(token, yytext, TAM_TOKEN);
+  IMPRIME("integer ");
+  return INTEGER;
+}
+
+bool {
+  simbolo = s_bool;
+  strncpy(token, yytext, TAM_TOKEN);
+  IMPRIME("bool ");
+  return BOOL;
 }
 
 label   { simbolo = s_label;

@@ -1,4 +1,8 @@
 *.o
 *.a
+*.yy.*
+*.tab.*
+*.output
+MEPA
 compilador
 execute-tests

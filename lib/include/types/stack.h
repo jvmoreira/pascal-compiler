@@ -6,12 +6,17 @@
 typedef char* String;
 
 typedef enum {
-  VAR, PARAMETER, PROCEDURE, FUNCTION, LABEL
-} SymbolType;
+  CAT_VARIABLE, CAT_PARAMETER, CAT_PROCEDURE, CAT_FUNCTION, CAT_LABEL
+} SymbolCategory;
+
+typedef enum {
+  TYPE_UNDEFINED, TYPE_INT, TYPE_BOOL
+} VarType;
 
 typedef struct {
   String name;
-  SymbolType type;
+  SymbolCategory category;
+  VarType type;
   short lexicalLevel;
   short shift;
 } _Symbol;
