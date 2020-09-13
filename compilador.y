@@ -10,19 +10,19 @@ extern char *yytext;
 
 %}
 
-%token PROGRAM VAR INTEGER BOOL LABEL TYPE ARRAY OF T_BEGIN T_END PROCEDURE FUNCTION
-%token GOTO IF THEN ELSE WHILE DO AND OR NOT DIV
+%token PROGRAM VAR INTEGER BOOL LABEL NUMERO TYPE ARRAY OF T_BEGIN
+%token T_END PROCEDURE FUNCTION GOTO IF THEN ELSE WHILE DO AND OR NOT MULTP DIV
 %token ATRIBUICAO PONTO_E_VIRGULA DOIS_PONTOS SINAL_MAIS SINAL_MENOS SINAL_IGUAL DIFERENTE
 %token MENOR MENOR_IGUAL MAIOR MAIOR_IGUAL VIRGULA PONTO ABRE_PARENTESES FECHA_PARENTESES IDENT
 
 %%
 
 programa:
-  { geraInstrucao("INPP"); commitInstrucao(); }
+  { geraInstrucaoUnica("INPP"); }
   PROGRAM IDENT
   ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
   bloco PONTO
-  { geraInstrucao("PARA"); commitInstrucao(); }
+  { geraInstrucaoUnica("PARA"); }
 ;
 
 bloco:
@@ -70,6 +70,10 @@ lista_idents:
   | IDENT
 ;
 
+ponto_e_virgula_opcional:
+  PONTO_E_VIRGULA
+  |
+;
 
 comando_composto:
   T_BEGIN
@@ -78,8 +82,91 @@ comando_composto:
 ;
 
 comandos:
+    comandos comando
+  | comando
+  |
 ;
 
+comando:
+    rotulo_opcional comando_sem_rotulo PONTO_E_VIRGULA
+  | rotulo_opcional comando_composto ponto_e_virgula_opcional
+;
+
+rotulo_opcional:
+  NUMERO DOIS_PONTOS
+  |
+;
+
+comando_sem_rotulo:
+  atribuicao
+;
+
+atribuicao:
+  variavel_lvalue
+  ATRIBUICAO
+  expressao
+  { armazenaResultadoEmLValue(); }
+;
+
+relacao_com_expressao_simples:
+    SINAL_IGUAL   expressao_simples { validaTipoAplicaOperacao("CMIG", TYPE_BOOL); }
+  | DIFERENTE     expressao_simples { validaTipoAplicaOperacao("CMDG", TYPE_BOOL); }
+  | MENOR         expressao_simples { validaTipoAplicaOperacao("CMME", TYPE_BOOL); }
+  | MENOR_IGUAL   expressao_simples { validaTipoAplicaOperacao("CMEG", TYPE_BOOL); }
+  | MAIOR         expressao_simples { validaTipoAplicaOperacao("CMMA", TYPE_BOOL); }
+  | MAIOR_IGUAL   expressao_simples { validaTipoAplicaOperacao("CMAG", TYPE_BOOL); }
+;
+
+expressao:
+  expressao_simples
+  | expressao_simples relacao_com_expressao_simples
+;
+
+sinal_aritmetico:
+  SINAL_MAIS
+  | SINAL_MENOS
+  |
+;
+
+expressao_simples:
+  sinal_aritmetico
+  termo
+  operacoes_basicas
+;
+
+operacoes_basicas:
+  operacoes_basicas operacao_basica
+  | operacao_basica
+  |
+;
+
+operacao_basica:
+    SINAL_MAIS  termo { validaTipoAplicaOperacao("SOMA", TYPE_INT); }
+  | SINAL_MENOS termo { validaTipoAplicaOperacao("SUBT", TYPE_INT); }
+  | OR          termo { validaTipoAplicaOperacao("DISJ", TYPE_BOOL); }
+;
+
+termo:
+    fator MULTP fator { validaTipoAplicaOperacao("MULT", TYPE_INT); }
+  | fator DIV   fator { validaTipoAplicaOperacao("DIVI", TYPE_INT); }
+  | fator AND   fator { validaTipoAplicaOperacao("CONJ", TYPE_BOOL); }
+  | fator
+;
+
+fator:
+    variavel
+  | NUMERO { carregaConstanteEmpilhaTipo(token, TYPE_INT); }
+  | ABRE_PARENTESES expressao FECHA_PARENTESES
+  | NOT fator
+;
+
+variavel:
+  IDENT { carregaValorEmpilhaTipo(token); }
+;
+
+variavel_lvalue:
+  IDENT { salvaLValue(token); }
+;
 
 %%
 

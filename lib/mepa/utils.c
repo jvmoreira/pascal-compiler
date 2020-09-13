@@ -23,6 +23,11 @@ void geraInstrucao(char* comando) {
   fprintf(arquivoSaida, "     %s", comando);
 }
 
+void geraInstrucaoUnica(char* comando) {
+  geraInstrucao(comando);
+  commitInstrucao();
+}
+
 void geraArgumentoInteiro(int argumento) {
   fprintf(arquivoSaida, " %i", argumento);
 }
@@ -48,5 +53,6 @@ void finalizaCompilador() {
 
 int geraErro(char* erro) {
   fprintf (stderr, "Erro na linha %d - %s\n", linhaAtual, erro);
+  finalizaCompilador();
   exit(-1);
 }

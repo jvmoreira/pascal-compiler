@@ -6,7 +6,7 @@
 typedef char* String;
 
 typedef enum {
-  CAT_VARIABLE, CAT_PARAMETER, CAT_PROCEDURE, CAT_FUNCTION, CAT_LABEL
+  CAT_VARIABLE, CAT_PARAM_VAL, CAT_PARAM_REF, CAT_PROCEDURE, CAT_FUNCTION, CAT_LABEL
 } SymbolCategory;
 
 typedef enum {
