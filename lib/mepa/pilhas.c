@@ -37,6 +37,32 @@ void handleNovaVariavel(char* variavel) {
   stackInsertSymbol(tabelaDeSimbolos, simbolo);
 }
 
+Symbol buscaSimboloOrDie(char* nomeSimbolo) {
+  Symbol symbol = stackSearchSymbol(tabelaDeSimbolos, nomeSimbolo);
+  if(!symbol)
+    geraErro("Simbolo não declarado");
+
+  return symbol;
+}
+
+void handleInverteValor() {
+  empilhaTipo("INVR", TYPE_INT);
+  validaTipoAplicaOperacao("INVR", TYPE_INT);
+}
+
+void handleNovaLeitura(char* nomeSimbolo) {
+  salvaLValue(nomeSimbolo);
+  geraInstrucaoUnica("LEIT");
+  empilhaTipo("LEIT", LValue->type);
+  armazenaResultadoEmLValue();
+}
+
+void handleNovaEscrita(char* nomeSimbolo) {
+  Symbol simbolo = buscaSimboloOrDie(nomeSimbolo);
+  geraInstrucaoCarregaValor(simbolo);
+  geraInstrucaoUnica("IMPR");
+}
+
 void adicionaTipoAosSimbolos(VarType tipo) {
   if(tabelaDeSimbolos->length < escopo.numeroDeVariaveis)
     geraErro("#adicionaTipoAosSimbolos");
@@ -76,17 +102,12 @@ int desempilhaTipo() {
 }
 
 void salvaLValue(char* nomeSimbolo) {
-  LValue = stackSearchSymbol(tabelaDeSimbolos, nomeSimbolo);
-  if(!simbolo)
-    geraErro("Variavel não declarada");
-}
-
-int atribuicaoIndireta() {
-  return LValue->category == CAT_PARAM_REF;
+  LValue = buscaSimboloOrDie(nomeSimbolo);
 }
 
 void geraInstrucaoArmazena() {
-  char *instrucao = atribuicaoIndireta() ? "ARMI" : "ARMZ";
+  int atribuicaoIndireta = LValue->category == CAT_PARAM_REF;
+  char *instrucao = atribuicaoIndireta ? "ARMI" : "ARMZ";
   geraInstrucao(instrucao);
   geraArgumentoInteiro(LValue->lexicalLevel);
   geraArgumentoInteiro(LValue->shift);
@@ -115,19 +136,19 @@ void validaTipoAplicaOperacao(char* operacao, VarType tipoOperacao) {
   empilhaTipo(operacao, tipoOperacao);
 }
 
-void carregaValor(Symbol simbolo) {
-  geraInstrucao("CRVL");
+void geraInstrucaoCarregaValor(Symbol simbolo) {
+  int valorIndireto = simbolo->category == CAT_PARAM_REF;
+  char *instrucao = valorIndireto ? "CRVI" : "CRVL";
+  geraInstrucao(instrucao);
   geraArgumentoInteiro(simbolo->lexicalLevel);
   geraArgumentoInteiro(simbolo->shift);
   commitInstrucao();
 }
 
 void carregaValorEmpilhaTipo(char* nomeSimbolo) {
-  Symbol simbolo = stackSearchSymbol(tabelaDeSimbolos, nomeSimbolo);
-  if(!simbolo)
-    geraErro("Variavel não declarada");
+  Symbol simbolo = buscaSimboloOrDie(nomeSimbolo);
 
-  carregaValor(simbolo);
+  geraInstrucaoCarregaValor(simbolo);
   empilhaTipo(simbolo->name, simbolo->type);
 }
 
@@ -156,7 +177,7 @@ void printPilha(Stack pilha, char* nomePilha) {
 
   printf("%s\n", nomePilha);
   while(conteudo) {
-    printf("\tNOME\t\tVALOR\n");
+    printf("\tNOME\t\tTIPO\n");
     printf("\t%s\t\t%i\n\n", conteudo->name, conteudo->value);
 
     itemAtual = itemAtual->previous;

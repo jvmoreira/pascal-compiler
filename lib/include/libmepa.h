@@ -4,7 +4,7 @@
 #include "types/mepa.h"
 #include "libstack.h"
 
-#define DEBUG 5
+#define DEBUG 1
 
 extern Simbolos simbolo, relacao;
 extern char token[TAM_TOKEN];
@@ -27,12 +27,17 @@ int geraErro(char* erro);
 void iniciaEscopo();
 void configuraDeclaracaoVariaveis();
 void handleNovaVariavel(char* nome);
+void handleInverteValor();
+void handleNovaLeitura(char* simbolo);
+void handleNovaEscrita(char* simbolo);
 void adicionaTipoAosSimbolos(VarType tipo);
 void adicionaInstrucaoAMEM();
 void adicionaInstrucaoDMEM();
+void empilhaTipo(char* nome, int tipo);
 void salvaLValue(char* nomeSimbolo);
 void armazenaResultadoEmLValue();
 void validaTipoAplicaOperacao(char* operacao, VarType tipo);
+void geraInstrucaoCarregaValor(Symbol simbolo);
 void carregaValorEmpilhaTipo(char* nomeSimbolo);
 void carregaConstanteEmpilhaTipo(char* valor, VarType tipo);
 void destroiPilhas();

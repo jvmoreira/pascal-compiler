@@ -11,7 +11,7 @@ extern char *yytext;
 %}
 
 %token PROGRAM VAR INTEGER BOOL LABEL NUMERO TYPE ARRAY OF T_BEGIN
-%token T_END PROCEDURE FUNCTION GOTO IF THEN ELSE WHILE DO AND OR NOT MULTP DIV
+%token T_END PROCEDURE FUNCTION READ WRITE GOTO IF THEN ELSE WHILE DO AND OR NOT MULTP DIV
 %token ATRIBUICAO PONTO_E_VIRGULA DOIS_PONTOS SINAL_MAIS SINAL_MENOS SINAL_IGUAL DIFERENTE
 %token MENOR MENOR_IGUAL MAIOR MAIOR_IGUAL VIRGULA PONTO ABRE_PARENTESES FECHA_PARENTESES IDENT
 
@@ -70,11 +70,6 @@ lista_idents:
   | IDENT
 ;
 
-ponto_e_virgula_opcional:
-  PONTO_E_VIRGULA
-  |
-;
-
 comando_composto:
   T_BEGIN
   comandos
@@ -88,8 +83,9 @@ comandos:
 ;
 
 comando:
-    rotulo_opcional comando_sem_rotulo PONTO_E_VIRGULA
-  | rotulo_opcional comando_composto ponto_e_virgula_opcional
+    rotulo_opcional
+    comando_sem_rotulo
+    PONTO_E_VIRGULA
 ;
 
 rotulo_opcional:
@@ -98,7 +94,20 @@ rotulo_opcional:
 ;
 
 comando_sem_rotulo:
-  atribuicao
+    atribuicao
+  | READ ABRE_PARENTESES params_read FECHA_PARENTESES
+  | WRITE ABRE_PARENTESES params_write FECHA_PARENTESES
+  | comando_composto
+;
+
+params_read:
+    params_read VIRGULA IDENT { handleNovaLeitura(token); }
+  | IDENT { handleNovaLeitura(token); }
+;
+
+params_write:
+    params_write VIRGULA IDENT { handleNovaEscrita(token); }
+  | IDENT { handleNovaEscrita(token); }
 ;
 
 atribuicao:
@@ -122,16 +131,14 @@ expressao:
   | expressao_simples relacao_com_expressao_simples
 ;
 
-sinal_aritmetico:
-  SINAL_MAIS
-  | SINAL_MENOS
-  |
+termo_com_sinal_opcional:
+    SINAL_MENOS termo { handleInverteValor(); }
+  | SINAL_MAIS  termo
+  | termo
 ;
 
 expressao_simples:
-  sinal_aritmetico
-  termo
-  operacoes_basicas
+  termo_com_sinal_opcional operacoes_basicas
 ;
 
 operacoes_basicas:

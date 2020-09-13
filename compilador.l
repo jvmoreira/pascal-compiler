@@ -108,84 +108,98 @@ begin {
 end {
   simbolo = s_end;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("end  ");
+  IMPRIME("end ");
   return T_END;
 }
 
 procedure {
   simbolo = s_procedure;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("procedure  ");
+  IMPRIME("procedure ");
   return PROCEDURE;
 }
 
 function {
   simbolo = s_function;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("function  ");
+  IMPRIME("function ");
   return FUNCTION;
+}
+
+read {
+  simbolo = s_read;
+  strncpy(token, yytext, TAM_TOKEN);
+  IMPRIME("read ");
+  return READ;
+}
+
+write {
+  simbolo = s_write;
+  strncpy(token, yytext, TAM_TOKEN);
+  IMPRIME("write ");
+  return WRITE;
 }
 
 goto {
   simbolo = s_goto;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("goto  ");
+  IMPRIME("goto ");
   return GOTO;
 }
 
 if {
   simbolo = s_if;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("if  ");
+  IMPRIME("if ");
   return IF;
 }
 
 then {
   simbolo = s_then;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("then  ");
+  IMPRIME("then ");
   return THEN;
 }
 
 else {
   simbolo = s_else;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("else  ");
+  IMPRIME("else ");
   return ELSE;
 }
 
 while {
   simbolo = s_while;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("while  ");
+  IMPRIME("while ");
   return WHILE;
 }
 
 do {
   simbolo = s_do;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("do  ");
+  IMPRIME("do ");
   return DO;
 }
 
 and {
   simbolo = s_and;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("and  ");
+  IMPRIME("and ");
   return AND;
 }
 
 or {
   simbolo = s_or;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("or  ");
+  IMPRIME("or ");
   return OR;
 }
 
 not {
   simbolo = s_not;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME("not  ");
+  IMPRIME("not ");
   return NOT;
 }
 
@@ -206,14 +220,14 @@ div {
 := {
   simbolo = s_atribuicao;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME(" atribuicao  ");
+  IMPRIME(" atribuicao ");
   return ATRIBUICAO;
 }
 
 \; {
   simbolo = s_ponto_e_virgula;
   strncpy(token, yytext, TAM_TOKEN);
-  IMPRIME(" pt_virgula  ");
+  IMPRIME(" pt_virgula ");
   return PONTO_E_VIRGULA;
 }
 
