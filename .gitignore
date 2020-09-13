@@ -3,6 +3,6 @@
 *.yy.*
 *.tab.*
 *.output
-MEPA
+/MEPA
 compilador
 execute-tests

@@ -3,7 +3,9 @@ CFLAGS = -Wall -Wextra -Werror -I include
 LIB = libmepa.a
 
 MEPA_FILES = mepa/utils	\
-		mepa/pilhas
+		mepa/pilhas		\
+		mepa/rotulos	\
+		mepa/while
 
 STACK_FILES = stack/helpers	\
 		stack/symbol	\

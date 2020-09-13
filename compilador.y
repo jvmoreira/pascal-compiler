@@ -97,6 +97,7 @@ comando_sem_rotulo:
     atribuicao
   | READ ABRE_PARENTESES params_read FECHA_PARENTESES
   | WRITE ABRE_PARENTESES params_write FECHA_PARENTESES
+  | comando_repetitivo
   | comando_composto
 ;
 
@@ -108,6 +109,12 @@ params_read:
 params_write:
     params_write VIRGULA IDENT { handleNovaEscrita(token); }
   | IDENT { handleNovaEscrita(token); }
+;
+
+comando_repetitivo:
+  WHILE { handleWhile(); }
+  expressao { avaliaExpressaoWhile(); }
+  DO comando_sem_rotulo { handleFimWhile(); }
 ;
 
 atribuicao:

@@ -13,6 +13,7 @@ void iniciaCompilador() {
   arquivoSaida = fopen("MEPA", "w");
 
   iniciaEscopo();
+  iniciaRotulos();
 }
 
 void novaLinha() {
@@ -36,8 +37,19 @@ void geraArgumentoString(char *argumento) {
   fprintf(arquivoSaida, " %s", argumento);
 }
 
-void geraInstrucaoComRotulo(char* comando, char* rotulo) {
-  fprintf(arquivoSaida, "%s: %s", rotulo, comando);
+void geraInstrucaoDesvio(char* desvio, int rotulo) {
+  geraInstrucao(desvio);
+  fprintf(arquivoSaida, " R%02i", rotulo);
+  commitInstrucao();
+}
+
+void geraInstrucaoComRotulo(char* comando, int rotulo) {
+  fprintf(arquivoSaida, "R%02i: %s", rotulo, comando);
+}
+
+void geraInstrucaoUnicaComRotulo(char* comando, int rotulo) {
+  geraInstrucaoComRotulo(comando, rotulo);
+  commitInstrucao();
 }
 
 void commitInstrucao() {
@@ -49,6 +61,7 @@ void finalizaCompilador() {
   fclose(arquivoSaida);
 
   destroiPilhas();
+  finalizaRotulos();
 }
 
 int geraErro(char* erro) {

@@ -96,6 +96,8 @@ void empilhaTipo(char* nome, int tipo) {
 
 int desempilhaTipo() {
   StackValue value = stackPopValue(pilhaTipos);
+  if(!value)
+    geraErro("#desempilhaTipo");
   int tipo = value->value;
   destroyStackValue(value);
   return tipo;

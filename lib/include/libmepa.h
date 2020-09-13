@@ -18,7 +18,9 @@ void geraInstrucao(char* comando);
 void geraInstrucaoUnica(char* comando);
 void geraArgumentoInteiro(int argumento);
 void geraArgumentoString(char *argumento);
-void geraInstrucaoComRotulo(char* comando, char* rotulo);
+void geraInstrucaoDesvio(char* desvio, int rotulo);
+void geraInstrucaoComRotulo(char* comando, int rotulo);
+void geraInstrucaoUnicaComRotulo(char* comando, int rotulo);
 void commitInstrucao();
 int geraErro(char* erro);
 
@@ -44,5 +46,21 @@ void destroiPilhas();
 void printPilha(Stack pilha, char* nomePilha);
 void printPilhaTipos();
 void printTabelaDeSimbolos();
+
+/* ==================
+ * == ROTULOS ======= */
+void iniciaRotulos();
+int novoRotulo();
+void empilhaRotulo(int rotulo);
+int rotuloNoTopoDaPilha();
+int desempilhaRotulo();
+void printPilhaRotulos();
+void finalizaRotulos();
+
+/* ==================
+ * == WHILE ========= */
+void handleWhile();
+void avaliaExpressaoWhile();
+void handleFimWhile();
 
 #endif
