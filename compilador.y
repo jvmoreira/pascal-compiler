@@ -15,6 +15,9 @@ extern char *yytext;
 %token ATRIBUICAO PONTO_E_VIRGULA DOIS_PONTOS SINAL_MAIS SINAL_MENOS SINAL_IGUAL DIFERENTE
 %token MENOR MENOR_IGUAL MAIOR MAIOR_IGUAL VIRGULA PONTO ABRE_PARENTESES FECHA_PARENTESES IDENT
 
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
 %%
 
 programa:
@@ -98,6 +101,7 @@ comando_sem_rotulo:
   | READ ABRE_PARENTESES params_read FECHA_PARENTESES
   | WRITE ABRE_PARENTESES params_write FECHA_PARENTESES
   | comando_repetitivo
+  | comando_condicional
   | comando_composto
 ;
 
@@ -115,6 +119,24 @@ comando_repetitivo:
   WHILE { handleWhile(); }
   expressao { avaliaExpressaoWhile(); }
   DO comando_sem_rotulo { handleFimWhile(); }
+;
+
+comando_condicional:
+  if_then
+  cond_else
+  { handleFimIf(); }
+;
+
+if_then:
+  IF expressao
+  { avaliaExpressaoIf(); }
+   THEN comando_sem_rotulo
+  { handleSaidaIfThen(); }
+;
+
+cond_else:
+  ELSE comando_sem_rotulo
+  | %prec LOWER_THAN_ELSE
 ;
 
 atribuicao:

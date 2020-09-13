@@ -26,4 +26,9 @@ begin
     n := n + 1;
   end;
 
+  if(m < 10) then
+    write(m)
+  else
+    write(n);
+
 end.

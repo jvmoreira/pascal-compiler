@@ -5,7 +5,7 @@ LIB = libmepa.a
 MEPA_FILES = mepa/utils	\
 		mepa/pilhas		\
 		mepa/rotulos	\
-		mepa/while
+		mepa/desvios
 
 STACK_FILES = stack/helpers	\
 		stack/symbol	\

@@ -58,9 +58,12 @@ void printPilhaRotulos();
 void finalizaRotulos();
 
 /* ==================
- * == WHILE ========= */
+ * == DESVIOS ======= */
 void handleWhile();
 void avaliaExpressaoWhile();
 void handleFimWhile();
+void avaliaExpressaoIf();
+void handleSaidaIfThen();
+void handleFimIf();
 
 #endif
