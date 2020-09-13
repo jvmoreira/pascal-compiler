@@ -1,41 +1,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "libmepa.h"
 #include "libstack.h"
-#include "setup.h"
 
-FILE* outputFile;
-Stack symbolTable;
-Stack typesStack;
-Stack variablesStack;
-Stack subroutinesStack;
+FILE* arquivoSaida;
+Stack tabelaDeSimbolos;
+Stack pilhaTipos;
+Stack pilhaVariaveis;
+Stack pilhaSubrotinas;
 
 Simbolos simbolo, relacao;
 char token[TAM_TOKEN];
 
 void iniciaCompilador() {
-  outputFile = fopen("MEPA", "w");
+  arquivoSaida = fopen("MEPA", "w");
 
   iniciaPilhas();
 }
 
 void iniciaPilhas() {
-  symbolTable = newStackWithType(SYMBOL);
-  typesStack = newStackWithType(VALUE);
-  variablesStack = newStackWithType(VALUE);
-  subroutinesStack = newStackWithType(VALUE);
+  tabelaDeSimbolos = newStackWithType(SYMBOL);
+  pilhaTipos = newStackWithType(VALUE);
+  pilhaVariaveis = newStackWithType(VALUE);
+  pilhaSubrotinas = newStackWithType(VALUE);
 }
 
 // ========================================================================================
 
 void geraCodigo(char* comando) {
-  fprintf(outputFile, "     %s\n", comando);
-  fflush(outputFile);
+  fprintf(arquivoSaida, "     %s\n", comando);
+  fflush(arquivoSaida);
 }
 
 void geraCodigoComRotulo(char* comando, char* rotulo) {
-  fprintf(outputFile, "%s: %s \n", rotulo, comando);
-  fflush(outputFile);
+  fprintf(arquivoSaida, "%s: %s \n", rotulo, comando);
+  fflush(arquivoSaida);
 }
 
 int geraErro(char* erro) {

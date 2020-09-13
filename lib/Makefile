@@ -1,18 +1,26 @@
-LIBS =  stack			\
-				mepa
+CFLAGS = -Wall -Wextra -Werror -I include
 
-CLEAN = $(addprefix clean_, $(LIBS))
+LIB = libmepa.a
 
-.PHONY: all $(LIBS)
+MEPA_FILES = mepa/setup
 
-all: $(LIBS)
+STACK_FILES = stack/helpers	\
+		stack/symbol	\
+		stack/value		\
+		stack/item		\
+		stack/stack
 
-$(LIBS):
-	@make -C $@
+FILES = $(MEPA_FILES) $(STACK_FILES)
 
-clean: $(CLEAN)
-	@echo Cleaning static libraries...
-	@rm -f *.a
+OBJECTS = $(addsuffix .o, $(FILES))
 
-$(CLEAN):
-	@make clean -C $(subst clean_, , $@)
+.PHONY: all clean
+
+all: lib
+
+lib: $(LIB)( $(OBJECTS) )
+	@echo Static Library compiled!
+
+clean:
+	@echo Removing static library
+	@rm -f $(LIB)

@@ -1,7 +1,7 @@
 #ifndef __STACK_TYPES__
 #define __STACK_TYPES__
 
-#define MAX_STR_LEN 20
+#define MAX_STR_LEN 16
 
 typedef char* String;
 
