@@ -2,7 +2,8 @@ CFLAGS = -Wall -Wextra -Werror -I include
 
 LIB = libmepa.a
 
-MEPA_FILES = mepa/setup
+MEPA_FILES = mepa/utils	\
+		mepa/pilhas
 
 STACK_FILES = stack/helpers	\
 		stack/symbol	\

@@ -8,7 +8,9 @@
 
 #define IMPRIME(STR) printf("%s    # %s \n", STR, token);
 
-int nl = 1;
+int linhaAtual = 1;
+Simbolos simbolo, relacao;
+char token[TAM_TOKEN];
 
 %}
 
@@ -27,7 +29,7 @@ comentario "(*".*"*)"
 
 %%
 
-{pulo_linha} {nl++;}
+{pulo_linha} {linhaAtual++;}
 
 {descarte}
 

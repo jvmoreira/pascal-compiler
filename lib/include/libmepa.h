@@ -3,15 +3,17 @@
 
 #include "types/mepa.h"
 
-extern char token[TAM_TOKEN];
-extern Simbolos simbolo, relacao;
-
+/* ==================
+ * == UTILS ========= */
 void iniciaCompilador();
-
-void iniciaPilhas();
-
+void finalizaCompilador();
 void geraCodigo(char* comando);
 void geraCodigoComRotulo(char* comando, char* rotulo);
 int geraErro(char* erro);
+
+/* ==================
+ * == PILHAS ======== */
+void iniciaPilhas();
+void destroiPilhas();
 
 #endif
