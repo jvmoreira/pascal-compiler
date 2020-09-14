@@ -20,6 +20,8 @@ void novaLinha() {
   linhaAtual++;
 }
 
+int argumentos = 0;
+
 void geraInstrucao(char* comando) {
   fprintf(arquivoSaida, "     %s", comando);
 }
@@ -29,12 +31,21 @@ void geraInstrucaoUnica(char* comando) {
   commitInstrucao();
 }
 
+void adicionaVirgulaAntesArgumento() {
+  if(argumentos > 0)
+    fprintf(arquivoSaida, ",");
+}
+
 void geraArgumentoInteiro(int argumento) {
+  adicionaVirgulaAntesArgumento();
   fprintf(arquivoSaida, " %i", argumento);
+  argumentos++;
 }
 
 void geraArgumentoString(char *argumento) {
+  adicionaVirgulaAntesArgumento();
   fprintf(arquivoSaida, " %s", argumento);
+  argumentos++;
 }
 
 void geraInstrucaoDesvio(char* desvio, int rotulo) {
@@ -55,6 +66,7 @@ void geraInstrucaoUnicaComRotulo(char* comando, int rotulo) {
 void commitInstrucao() {
   fprintf(arquivoSaida, "\n");
   fflush(arquivoSaida);
+  argumentos = 0;
 }
 
 void finalizaCompilador() {
