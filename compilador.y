@@ -36,10 +36,6 @@ bloco:
 ;
 
 parte_declara_vars:
-  var
-;
-
-var:
   VAR declara_vars { adicionaInstrucaoAMEM(); }
   |
 ;
@@ -74,21 +70,19 @@ lista_idents:
 ;
 
 comando_composto:
-  T_BEGIN
-  comandos
-  T_END
+    T_BEGIN comandos T_END
+  | T_BEGIN T_END
 ;
 
 comandos:
-    comandos comando
+    comando PONTO_E_VIRGULA comandos
   | comando
-  |
+  | comando PONTO_E_VIRGULA
 ;
 
 comando:
-    rotulo_opcional
-    comando_sem_rotulo
-    PONTO_E_VIRGULA
+  rotulo_opcional
+  comando_sem_rotulo
 ;
 
 rotulo_opcional:
@@ -167,13 +161,13 @@ termo_com_sinal_opcional:
 ;
 
 expressao_simples:
-  termo_com_sinal_opcional operacoes_basicas
+    termo_com_sinal_opcional operacoes_basicas
+  | termo_com_sinal_opcional
 ;
 
 operacoes_basicas:
-  operacoes_basicas operacao_basica
+    operacao_basica operacoes_basicas
   | operacao_basica
-  |
 ;
 
 operacao_basica:
