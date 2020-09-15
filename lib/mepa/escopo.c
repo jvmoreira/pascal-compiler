@@ -180,7 +180,7 @@ void adicionaProcedimentoTabelaDeSimbolos(char* nomeProcedimento) {
   procedimento->category = CAT_PROCEDURE;
   procedimento->lexicalLevel = escopo.atual;
   procedimento->label = escopo.rotulo;
-  procedimento->parameters = 0;
+  procedimento->numberOfParameters = 0;
   stackInsertSymbol(tabelaDeSimbolos, procedimento);
 }
 
@@ -197,7 +197,7 @@ void handleListaDeParametrosReais() {
 
 void handleNovoParametroReal() {
   parametrosEmpilhados++;
-  if(parametrosEmpilhados > simboloGlobal->parameters)
+  if(parametrosEmpilhados > simboloGlobal->numberOfParameters)
     geraErro("Numero incorreto de parametros na chamada de subrotina");
 }
 

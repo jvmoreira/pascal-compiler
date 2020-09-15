@@ -18,6 +18,12 @@ StackValue stackPopValue(Stack stack);
 void destroyStackValue(StackValue stackValue);
 
 /* ==================
+ * == PARAMETER ===== */
+ Parameter newParameter(SymbolCategory category);
+ void addParameterToSymbol(Symbol symbol, Parameter param);
+ void destroyParameters(Symbol symbol);
+
+/* ==================
  * == SYMBOL ======== */
 Symbol newSymbol(String name);
 Symbol extractSymbol(StackItem item);

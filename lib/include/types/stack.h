@@ -13,6 +13,13 @@ typedef enum {
   TYPE_NULL, TYPE_UNDEFINED, TYPE_INT, TYPE_BOOL, TYPE_ADDR
 } VarType;
 
+typedef struct _Parameter {
+  VarType type;
+  SymbolCategory category;
+  struct _Parameter *next;
+} _Parameter;
+typedef _Parameter* Parameter;
+
 typedef struct {
   String name;
   SymbolCategory category;
@@ -20,7 +27,8 @@ typedef struct {
   int lexicalLevel;
   int shift;
   int label;
-  int parameters;
+  int numberOfParameters;
+  Parameter parameters;
 } _Symbol;
 typedef _Symbol* Symbol;
 

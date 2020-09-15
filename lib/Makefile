@@ -8,9 +8,10 @@ MEPA_FILES = mepa/utils \
 		mepa/desvios
 
 STACK_FILES = stack/helpers \
-		stack/symbol  \
-		stack/value   \
-		stack/item    \
+		stack/parameter  \
+		stack/symbol     \
+		stack/value      \
+		stack/item       \
 		stack/stack
 
 FILES = $(MEPA_FILES) $(STACK_FILES)

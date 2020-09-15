@@ -8,6 +8,7 @@ Symbol newSymbol(String name) {
     return NULL;
 
   Symbol symbol = (Symbol) malloc(sizeof(_Symbol));
+  symbol->parameters = NULL;
 
   symbol->name = (String) malloc(1 + strlen(name));
   strcpy(symbol->name, name);
@@ -56,6 +57,8 @@ Symbol stackPopSymbol(Stack stack) {
 void destroySymbol(Symbol symbol) {
   if(!symbol)
     return;
+
+  destroyParameters(symbol);
   free(symbol->name);
   free(symbol);
 }
