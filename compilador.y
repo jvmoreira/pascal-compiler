@@ -133,12 +133,42 @@ rotulo_opcional:
 ;
 
 comando_sem_rotulo:
-    atribuicao
-  | READ ABRE_PARENTESES params_read FECHA_PARENTESES
-  | WRITE ABRE_PARENTESES params_write FECHA_PARENTESES
+    atribuicao_ou_chamada_procedimento
   | comando_repetitivo
   | comando_condicional
   | comando_composto
+  | READ ABRE_PARENTESES params_read FECHA_PARENTESES
+  | WRITE ABRE_PARENTESES params_write FECHA_PARENTESES
+;
+
+atribuicao_ou_chamada_procedimento:
+  IDENT { salvaSimboloOrDie(token); }
+  decide_atribuicao_ou_chamada_procedimento
+;
+
+decide_atribuicao_ou_chamada_procedimento:
+    atribuicao
+  | chamada_procedimento { handleChamadaDeSubrotina(); }
+;
+
+atribuicao:
+    ATRIBUICAO { empilhaSimboloComoLValue(); }
+    expressao
+  { armazenaResultadoEmLValue(); }
+;
+
+chamada_procedimento:
+    ABRE_PARENTESES
+  { handleListaDeParametrosReais(); }
+    lista_parametros_reais
+    FECHA_PARENTESES
+  | ABRE_PARENTESES FECHA_PARENTESES
+  |
+;
+
+lista_parametros_reais:
+    expressao { handleNovoParametroReal(); } VIRGULA lista_parametros_reais
+  | expressao { handleNovoParametroReal(); }
 ;
 
 params_read:
@@ -173,13 +203,6 @@ if_then:
 cond_else:
   ELSE comando_sem_rotulo
   | %prec LOWER_THAN_ELSE
-;
-
-atribuicao:
-  variavel_lvalue
-  ATRIBUICAO
-  expressao
-  { armazenaResultadoEmLValue(); }
 ;
 
 relacao_com_expressao_simples:
@@ -234,10 +257,6 @@ fator:
 
 variavel:
   IDENT { carregaValorEmpilhaTipo(token); }
-;
-
-variavel_lvalue:
-  IDENT { salvaLValue(token); }
 ;
 
 %%

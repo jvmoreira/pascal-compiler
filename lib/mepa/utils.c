@@ -31,20 +31,26 @@ void geraInstrucaoUnica(char* comando) {
   commitInstrucao();
 }
 
-void adicionaVirgulaAntesArgumento() {
+void adicionaVirgulaAntesDeArgumento() {
   if(argumentos > 0)
     fprintf(arquivoSaida, ",");
 }
 
 void geraArgumentoInteiro(int argumento) {
-  adicionaVirgulaAntesArgumento();
+  adicionaVirgulaAntesDeArgumento();
   fprintf(arquivoSaida, " %i", argumento);
   argumentos++;
 }
 
 void geraArgumentoString(char *argumento) {
-  adicionaVirgulaAntesArgumento();
+  adicionaVirgulaAntesDeArgumento();
   fprintf(arquivoSaida, " %s", argumento);
+  argumentos++;
+}
+
+void geraArgumentoRotulo(int rotulo) {
+  adicionaVirgulaAntesDeArgumento();
+  fprintf(arquivoSaida, " R%02i", rotulo);
   argumentos++;
 }
 

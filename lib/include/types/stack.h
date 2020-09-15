@@ -10,7 +10,7 @@ typedef enum {
 } SymbolCategory;
 
 typedef enum {
-  TYPE_NULL, TYPE_UNDEFINED, TYPE_INT, TYPE_BOOL
+  TYPE_NULL, TYPE_UNDEFINED, TYPE_INT, TYPE_BOOL, TYPE_ADDR
 } VarType;
 
 typedef struct {
@@ -20,6 +20,7 @@ typedef struct {
   int lexicalLevel;
   int shift;
   int label;
+  int parameters;
 } _Symbol;
 typedef _Symbol* Symbol;
 

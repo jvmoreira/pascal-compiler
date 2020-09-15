@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include "libmepa.h"
 
-Symbol LValue;
+Symbol simboloGlobal;
 Stack tabelaDeSimbolos;
+Stack pilhaLValues;
 Stack pilhaTipos;
 Stack pilhaVariaveis;
 Stack pilhaSubrotinas;
+
+int parametrosEmpilhados;
+int chamadaDeSubrotinaOcorrendo;
 
 struct {
   int atual;
@@ -16,6 +20,7 @@ struct {
 
 void iniciaPilhas() {
   tabelaDeSimbolos = newStackWithType(SYMBOL);
+  pilhaLValues = newStackWithType(SYMBOL);
   pilhaTipos = newStackWithType(VALUE);
   pilhaVariaveis = newStackWithType(VALUE);
   pilhaSubrotinas = newStackWithType(VALUE);
@@ -26,6 +31,9 @@ void iniciaEscopo() {
   escopo.rotulo = -1;
   escopo.numeroDeVariaveis = 0;
   escopo.numeroDeSubrotinas = 0;
+
+  parametrosEmpilhados = 0;
+  chamadaDeSubrotinaOcorrendo = 0;
 
   iniciaPilhas();
 }
@@ -114,7 +122,7 @@ Symbol buscaSimbolo(char* nomeSimbolo) {
 Symbol buscaSimboloOrDie(char* nomeSimbolo) {
   Symbol symbol = buscaSimbolo(nomeSimbolo);
   if(!symbol)
-    geraErro("Simbolo não declarado");
+    geraErro("Simbolo nao declarado");
 
   return symbol;
 }
@@ -153,9 +161,10 @@ void handleInverteValor() {
 }
 
 void handleNovaLeitura(char* nomeSimbolo) {
-  salvaLValue(nomeSimbolo);
+  salvaSimboloOrDie(nomeSimbolo);
   geraInstrucaoUnica("LEIT");
-  empilhaTipo("LEIT", LValue->type);
+  empilhaTipo("LEIT", simboloGlobal->type);
+  empilhaSimboloComoLValue();
   armazenaResultadoEmLValue();
 }
 
@@ -171,6 +180,7 @@ void adicionaProcedimentoTabelaDeSimbolos(char* nomeProcedimento) {
   procedimento->category = CAT_PROCEDURE;
   procedimento->lexicalLevel = escopo.atual;
   procedimento->label = escopo.rotulo;
+  procedimento->parameters = 0;
   stackInsertSymbol(tabelaDeSimbolos, procedimento);
 }
 
@@ -179,6 +189,29 @@ void handleNovoProcedimento(char* nomeProcedimento) {
   escopo.numeroDeSubrotinas++;
   iniciaNovoEscopo();
   adicionaProcedimentoTabelaDeSimbolos(nomeProcedimento);
+}
+
+void handleListaDeParametrosReais() {
+  chamadaDeSubrotinaOcorrendo = 1;
+}
+
+void handleNovoParametroReal() {
+  parametrosEmpilhados++;
+  if(parametrosEmpilhados > simboloGlobal->parameters)
+    geraErro("Numero incorreto de parametros na chamada de subrotina");
+}
+
+void geraInstrucaoCHPR() {
+  geraInstrucao("CHPR");
+  geraArgumentoRotulo(simboloGlobal->label);
+  geraArgumentoInteiro(escopo.atual);
+  commitInstrucao();
+}
+
+void handleChamadaDeSubrotina() {
+  parametrosEmpilhados = 0;
+  chamadaDeSubrotinaOcorrendo = 0;
+  geraInstrucaoCHPR();
 }
 
 void adicionaInstrucaoAMEM(int numeroDeVariaveis) {
@@ -220,11 +253,15 @@ int desempilhaTipo() {
   return desempilhaIntDaPilha(pilhaTipos);
 }
 
-void salvaLValue(char* nomeSimbolo) {
-  LValue = buscaSimboloOrDie(nomeSimbolo);
+void salvaSimboloOrDie(char* nomeSimbolo) {
+  simboloGlobal = buscaSimboloOrDie(nomeSimbolo);
 }
 
-void geraInstrucaoArmazena() {
+void empilhaSimboloComoLValue() {
+  stackInsertSymbol(pilhaLValues, simboloGlobal);
+}
+
+void geraInstrucaoArmazenaEmLValue(Symbol LValue) {
   int atribuicaoIndireta = LValue->category == CAT_PARAM_REF;
   char *instrucao = atribuicaoIndireta ? "ARMI" : "ARMZ";
   geraInstrucao(instrucao);
@@ -235,10 +272,12 @@ void geraInstrucaoArmazena() {
 
 void armazenaResultadoEmLValue() {
   int tipoResultado = desempilhaTipo();
+  Symbol LValue = stackPopSymbol(pilhaLValues);
+
   if(tipoResultado != (int)LValue->type)
     geraErro("Atribuicao com tipos incompativeis");
 
-  geraInstrucaoArmazena();
+  geraInstrucaoArmazenaEmLValue(LValue);
 }
 
 int validaTipoOperacao() {
@@ -284,6 +323,7 @@ void carregaConstanteEmpilhaTipo(char* constante, VarType tipo) {
 
 void destroiPilhas() {
   destroyStack(tabelaDeSimbolos);
+  destroyStack(pilhaLValues);
   destroyStack(pilhaTipos);
   destroyStack(pilhaVariaveis);
   destroyStack(pilhaSubrotinas);
