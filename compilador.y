@@ -48,11 +48,11 @@ declara_vars:
 ;
 
 declara_var:
-  lista_id_var DOIS_PONTOS tipo
+  lista_id_var DOIS_PONTOS tipo_variavel
   PONTO_E_VIRGULA
 ;
 
-tipo:
+tipo_variavel:
     INTEGER { adicionaTipoAosSimbolosGeraAMEM(TYPE_INT); }
   | BOOL    { adicionaTipoAosSimbolosGeraAMEM(TYPE_BOOL); }
   | IDENT   { geraErro("Tipo não suportado"); }
@@ -89,7 +89,7 @@ declara_procedimentos:
 
 declara_procedimento:
   PROCEDURE IDENT { handleNovoProcedimento(token); }
-  parametros_formais
+  ABRE_PARENTESES parametros_formais_ou_nada FECHA_PARENTESES
   PONTO_E_VIRGULA
   bloco PONTO_E_VIRGULA
 ;
@@ -100,15 +100,35 @@ declara_funcoes:
 ;
 
 declara_funcao:
-  FUNCTION IDENT parametros_formais DOIS_PONTOS IDENT PONTO_E_VIRGULA bloco PONTO_E_VIRGULA
+  FUNCTION IDENT ABRE_PARENTESES parametros_formais_ou_nada FECHA_PARENTESES DOIS_PONTOS IDENT PONTO_E_VIRGULA bloco PONTO_E_VIRGULA
+;
+
+parametros_formais_ou_nada:
+  parametros_formais { atualizaNivelLexicoDosParametrosFormais(); }
+  |
 ;
 
 parametros_formais:
-  lista_parametros_formais |
+    secao_parametros_formais PONTO_E_VIRGULA parametros_formais
+  | secao_parametros_formais
+;
+
+secao_parametros_formais:
+  { configuraParametrosFormaisPorValor(); }
+    lista_parametros_formais DOIS_PONTOS tipo_parametro_formal
+  | VAR { configuraParametrosFormaisPorReferencia(); }
+    lista_parametros_formais DOIS_PONTOS tipo_parametro_formal
 ;
 
 lista_parametros_formais:
-  ABRE_PARENTESES FECHA_PARENTESES
+    lista_parametros_formais VIRGULA IDENT { handleNovoParametroFormal(token); }
+  | IDENT { handleNovoParametroFormal(token); }
+;
+
+tipo_parametro_formal:
+    INTEGER { adicionaTipoAosParametrosFormais(TYPE_INT); }
+  | BOOL    { adicionaTipoAosParametrosFormais(TYPE_BOOL); }
+  | IDENT   { geraErro("Parametro com tipo não suportado"); }
 ;
 
 comando_composto:

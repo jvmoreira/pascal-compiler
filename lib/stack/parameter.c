@@ -3,11 +3,12 @@
 #include "libstack.h"
 
 Parameter newParameter(SymbolCategory category) {
-  if((category != CAT_PARAM_VAL) || (category != CAT_PARAM_REF))
+  if((category != CAT_PARAM_VAL) && (category != CAT_PARAM_REF))
     return NULL;
 
   Parameter param = (Parameter) malloc(sizeof(_Parameter));
   param->category = category;
+  param->type = TYPE_UNDEFINED;
   param->next = NULL;
 
   return param;

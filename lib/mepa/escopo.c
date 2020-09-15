@@ -10,6 +10,7 @@ Stack pilhaSubrotinas;
 
 int parametrosEmpilhados;
 int chamadaDeSubrotinaOcorrendo;
+SymbolCategory categoriaParametrosFormais;
 
 struct {
   int atual;
@@ -150,6 +151,22 @@ void handleNovaVariavel(char* nomeVariavel) {
   stackInsertSymbol(tabelaDeSimbolos, variavel);
 }
 
+void adicionaParametroFormalNaTabelaDeSimbolos(char* nomeParametro) {
+  Symbol parametro = newSymbol(nomeParametro);
+  parametro->type = TYPE_UNDEFINED;
+  parametro->category = categoriaParametrosFormais;
+  parametro->lexicalLevel = escopo.atual;
+  parametro->shift = 0;
+  stackInsertSymbol(tabelaDeSimbolos, parametro);
+}
+
+void handleNovoParametroFormal(char* nomeParametro) {
+  validaSimboloNoEscopoAtualOrDie(nomeParametro);
+  adicionaParametroFormalNaTabelaDeSimbolos(nomeParametro);
+  addParameterToSymbol(simboloGlobal, newParameter(categoriaParametrosFormais));
+  simboloGlobal->numberOfParameters++;
+}
+
 void handleNegaBool() {
   empilhaTipo("NEGA", TYPE_BOOL);
   validaTipoAplicaOperacao("NEGA", TYPE_BOOL);
@@ -174,7 +191,7 @@ void handleNovaEscrita(char* nomeSimbolo) {
   geraInstrucaoUnica("IMPR");
 }
 
-void adicionaProcedimentoTabelaDeSimbolos(char* nomeProcedimento) {
+void adicionaProcedimentoNaTabelaDeSimbolos(char* nomeProcedimento) {
   Symbol procedimento = newSymbol(nomeProcedimento);
   procedimento->type = TYPE_NULL;
   procedimento->category = CAT_PROCEDURE;
@@ -188,7 +205,8 @@ void handleNovoProcedimento(char* nomeProcedimento) {
   validaSimboloNoEscopoAtualOrDie(nomeProcedimento);
   escopo.numeroDeSubrotinas++;
   iniciaNovoEscopo();
-  adicionaProcedimentoTabelaDeSimbolos(nomeProcedimento);
+  adicionaProcedimentoNaTabelaDeSimbolos(nomeProcedimento);
+  salvaSimboloOrDie(nomeProcedimento);
 }
 
 void handleListaDeParametrosReais() {
@@ -210,8 +228,8 @@ void geraInstrucaoCHPR() {
 
 void handleChamadaDeSubrotina() {
   parametrosEmpilhados = 0;
-  chamadaDeSubrotinaOcorrendo = 0;
   geraInstrucaoCHPR();
+  chamadaDeSubrotinaOcorrendo = 0;
 }
 
 void adicionaInstrucaoAMEM(int numeroDeVariaveis) {
@@ -220,10 +238,10 @@ void adicionaInstrucaoAMEM(int numeroDeVariaveis) {
   commitInstrucao();
 }
 
-int variavelComTipoIndefinido(Symbol simbolo) {
+int simboloComTipoIndefinido(Symbol simbolo, SymbolCategory categoria) {
   return simbolo
     && simbolo->type == TYPE_UNDEFINED
-    && simbolo->category == CAT_VARIABLE;
+    && simbolo->category == categoria;
 }
 
 void adicionaTipoAosSimbolosGeraAMEM(VarType tipo) {
@@ -234,7 +252,7 @@ void adicionaTipoAosSimbolosGeraAMEM(VarType tipo) {
   StackItem itemAtual = tabelaDeSimbolos->top;
   Symbol simboloAtual = extractSymbol(itemAtual);
 
-  while(variavelComTipoIndefinido(simboloAtual)) {
+  while(simboloComTipoIndefinido(simboloAtual, CAT_VARIABLE)) {
     simboloAtual->type = tipo;
     variaveisParaAlocar++;
 
@@ -243,6 +261,47 @@ void adicionaTipoAosSimbolosGeraAMEM(VarType tipo) {
   }
 
   adicionaInstrucaoAMEM(variaveisParaAlocar);
+}
+
+void configuraParametrosFormaisPorValor() {
+  categoriaParametrosFormais = CAT_PARAM_VAL;
+}
+
+void configuraParametrosFormaisPorReferencia() {
+  categoriaParametrosFormais = CAT_PARAM_REF;
+}
+
+void adicionaTipoAosParametrosFormais(VarType tipo) {
+  StackItem itemAtual = tabelaDeSimbolos->top;
+  Symbol simboloAtual = extractSymbol(itemAtual);
+
+  while(simboloComTipoIndefinido(simboloAtual, categoriaParametrosFormais)) {
+    simboloAtual->type = tipo;
+
+    itemAtual = itemAtual->previous;
+    simboloAtual = extractSymbol(itemAtual);
+  }
+
+  Parameter paramAtual = simboloGlobal->parameters;
+  while(paramAtual) {
+    if(paramAtual->type == TYPE_UNDEFINED)
+      paramAtual->type = tipo;
+
+    paramAtual = paramAtual->next;
+  }
+}
+
+void atualizaNivelLexicoDosParametrosFormais() {
+  int deslocamento = -4;
+
+  StackItem itemAtual = tabelaDeSimbolos->top;
+  Symbol simboloAtual = extractSymbol(itemAtual);
+  for(int i = 0; i < simboloGlobal->numberOfParameters; ++i) {
+    simboloAtual->shift = deslocamento--;
+
+    itemAtual = itemAtual->previous;
+    simboloAtual = extractSymbol(itemAtual);
+  }
 }
 
 void empilhaTipo(char* nome, int tipo) {
