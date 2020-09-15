@@ -31,8 +31,10 @@ void iniciaPilhas() {
 }
 
 void iniciaEscopo() {
-  escopo.atual = -1;
-  escopo.rotulo = -1;
+  iniciaRotulos();
+
+  escopo.atual = 0;
+  escopo.rotulo = novoRotulo();
   escopo.numeroDeVariaveis = 0;
   escopo.numeroDeSubrotinas = 0;
   escopo.numeroDeParametros = 0;
@@ -56,7 +58,7 @@ void iniciaNovoEscopo() {
   escopo.numeroDeParametros = 0;
 }
 
-void handleDesvioParaEscopoAtual() {
+void desviaParaEscopoAtual() {
   geraInstrucaoDesvio("DSVS", escopo.rotulo);
 }
 
@@ -64,33 +66,20 @@ int escopoProgramaPrincipal() {
   return escopo.atual == 0;
 }
 
-void geraInstrucaoENPR() {
-  geraInstrucaoComRotulo("ENPR", escopo.rotulo);
-  geraArgumentoInteiro(escopo.atual);
-}
-
-void handleEntradaEscopo() {
-  if(escopoProgramaPrincipal())
-    geraInstrucaoComRotulo("NADA", escopo.rotulo);
-  else
-    geraInstrucaoENPR();
-
-  commitInstrucao();
-}
-
 void finalizaEscopoAtual() {
-  int nVariaveis = desempilhaIntDaPilha(pilhaVariaveis);
-  int nSubrotinas = desempilhaIntDaPilha(pilhaSubrotinas);
-  int nParametros = desempilhaIntDaPilha(pilhaParametros);
+  if(escopoProgramaPrincipal())
+    return;
 
   escopo.atual--;
   escopo.rotulo = desempilhaRotulo();
-  escopo.numeroDeVariaveis = nVariaveis;
-  escopo.numeroDeSubrotinas = nSubrotinas;
-  escopo.numeroDeParametros = nParametros;
+  escopo.numeroDeVariaveis = desempilhaIntDaPilha(pilhaVariaveis);
+  escopo.numeroDeSubrotinas = desempilhaIntDaPilha(pilhaSubrotinas);
+  escopo.numeroDeParametros = desempilhaIntDaPilha(pilhaParametros);
 }
 
 void adicionaInstrucaoDMEM() {
+  if(!escopo.numeroDeVariaveis)
+    return;
   geraInstrucao("DMEM");
   geraArgumentoInteiro(escopo.numeroDeVariaveis);
   commitInstrucao();
@@ -200,12 +189,18 @@ void handleNovaEscrita(char* nomeSimbolo) {
   geraInstrucaoUnica("IMPR");
 }
 
+void geraInstrucaoENPR() {
+  geraInstrucaoComRotulo("ENPR", simboloGlobal->label);
+  geraArgumentoInteiro(simboloGlobal->lexicalLevel);
+  commitInstrucao();
+}
+
 void adicionaProcedimentoNaTabelaDeSimbolos(char* nomeProcedimento) {
   Symbol procedimento = newSymbol(nomeProcedimento);
   procedimento->type = TYPE_NULL;
   procedimento->category = CAT_PROCEDURE;
-  procedimento->lexicalLevel = escopo.atual;
-  procedimento->label = escopo.rotulo;
+  procedimento->lexicalLevel = escopo.atual + 1;
+  procedimento->label = novoRotulo();
   procedimento->numberOfParameters = 0;
   stackInsertSymbol(tabelaDeSimbolos, procedimento);
 }
@@ -213,9 +208,10 @@ void adicionaProcedimentoNaTabelaDeSimbolos(char* nomeProcedimento) {
 void handleNovoProcedimento(char* nomeProcedimento) {
   validaSimboloNoEscopoAtualOrDie(nomeProcedimento);
   escopo.numeroDeSubrotinas++;
-  iniciaNovoEscopo();
   adicionaProcedimentoNaTabelaDeSimbolos(nomeProcedimento);
+  iniciaNovoEscopo();
   salvaSimboloOrDie(nomeProcedimento);
+  geraInstrucaoENPR();
 }
 
 void handleListaDeParametrosReais() {
@@ -236,9 +232,13 @@ void geraInstrucaoCHPR() {
 }
 
 void handleChamadaDeSubrotina() {
-  parametrosEmpilhados = 0;
   geraInstrucaoCHPR();
+  parametrosEmpilhados = 0;
   chamadaDeSubrotinaOcorrendo = 0;
+}
+
+void adicinaRotuloDoEscopoAtual() {
+  geraInstrucaoUnicaComRotulo("NADA", escopo.rotulo);
 }
 
 void adicionaInstrucaoAMEM(int numeroDeVariaveis) {

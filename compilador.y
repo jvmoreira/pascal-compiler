@@ -22,7 +22,7 @@ extern char *yytext;
 
 programa:
   { geraInstrucaoUnica("INPP"); }
-  PROGRAM IDENT { iniciaNovoEscopo(); }
+  PROGRAM IDENT
   ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
   bloco PONTO
   { geraInstrucaoUnica("PARA"); }
@@ -30,9 +30,9 @@ programa:
 
 bloco:
     parte_declara_vars
-  { handleDesvioParaEscopoAtual(); }
+  { desviaParaEscopoAtual(); }
     parte_declara_subrotinas
-  { handleEntradaEscopo(); }
+  { adicinaRotuloDoEscopoAtual(); }
     comando_composto
   { handleSaidaEscopo(); }
 ;

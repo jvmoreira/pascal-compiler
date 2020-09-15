@@ -13,7 +13,6 @@ void iniciaCompilador() {
   arquivoSaida = fopen("MEPA", "w");
 
   iniciaEscopo();
-  iniciaRotulos();
 }
 
 void novaLinha() {

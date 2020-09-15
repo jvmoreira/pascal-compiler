@@ -23,8 +23,8 @@ void handleFimWhile() {
 }
 
 void avaliaExpressaoIf() {
-  int rotuloElse = novoRotulo();
   int rotuloFimIf = novoRotulo();
+  int rotuloElse = novoRotulo();
 
   geraInstrucaoDesvio("DSVF", rotuloElse);
 

@@ -31,8 +31,7 @@ void geraErro(char* erro);
  * == ESCOPO ======== */
 void iniciaEscopo();
 void iniciaNovoEscopo();
-void handleDesvioParaEscopoAtual();
-void handleEntradaEscopo();
+void desviaParaEscopoAtual();
 void handleSaidaEscopo();
 void handleNovaVariavel(char* nomeVariavel);
 void handleNovoParametroFormal(char* nomeParametro);
@@ -44,6 +43,7 @@ void handleNovoProcedimento(char* nomeProcedimento);
 void handleListaDeParametrosReais();
 void handleNovoParametroReal();
 void handleChamadaDeSubrotina();
+void adicinaRotuloDoEscopoAtual();
 void adicionaTipoAosSimbolosGeraAMEM(VarType tipo);
 void configuraParametrosFormaisPorValor();
 void configuraParametrosFormaisPorReferencia();
