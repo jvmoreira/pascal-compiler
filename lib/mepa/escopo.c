@@ -395,8 +395,10 @@ Parameter parametroAtual() {
 void carregaParametroRealEmpilhaTipo(Symbol simbolo) {
   Parameter param = parametroAtual();
   int passagemPorReferencia = param->category == CAT_PARAM_REF;
+  int variavelPassadaPorReferencia = simbolo->category == CAT_PARAM_REF;
+  int deveCarregarEndereco = passagemPorReferencia && !variavelPassadaPorReferencia;
 
-  char *instrucao = passagemPorReferencia ? "CREN" : "CRVL";
+  char *instrucao = deveCarregarEndereco ? "CREN" : "CRVL";
   empilhaTipo(simbolo->name, passagemPorReferencia ? TYPE_ADDR : simbolo->type);
 
   geraInstrucao(instrucao);
