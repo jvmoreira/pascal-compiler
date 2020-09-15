@@ -89,8 +89,7 @@ declara_procedimentos:
 
 declara_procedimento:
   PROCEDURE IDENT { handleNovoProcedimento(token); }
-  ABRE_PARENTESES parametros_formais_ou_nada FECHA_PARENTESES
-  PONTO_E_VIRGULA
+  parametros_formais_ou_nada PONTO_E_VIRGULA
   bloco PONTO_E_VIRGULA
 ;
 
@@ -100,11 +99,13 @@ declara_funcoes:
 ;
 
 declara_funcao:
-  FUNCTION IDENT ABRE_PARENTESES parametros_formais_ou_nada FECHA_PARENTESES DOIS_PONTOS IDENT PONTO_E_VIRGULA bloco PONTO_E_VIRGULA
+  FUNCTION IDENT parametros_formais_ou_nada DOIS_PONTOS IDENT PONTO_E_VIRGULA bloco PONTO_E_VIRGULA
 ;
 
 parametros_formais_ou_nada:
+  ABRE_PARENTESES
   parametros_formais { atualizaNivelLexicoDosParametrosFormais(); }
+  FECHA_PARENTESES
   |
 ;
 
