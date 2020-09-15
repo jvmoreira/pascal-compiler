@@ -435,6 +435,14 @@ void carregaConstanteEmpilhaTipo(char* constante, VarType tipo) {
   empilhaTipo(constante, tipo);
 }
 
+int tipoNoTopoDaPilha() {
+  StackValue tipo = extractStackValue(pilhaTipos->top);
+  if(!tipo)
+    geraErro("#tipoNoTopoDaPilha");
+
+  return tipo->value;
+}
+
 void destroiPilhas() {
   destroyStack(tabelaDeSimbolos);
   destroyStack(pilhaLValues);

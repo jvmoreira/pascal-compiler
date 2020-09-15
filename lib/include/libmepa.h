@@ -57,6 +57,7 @@ void validaTipoAplicaOperacao(char* operacao, VarType tipo);
 void geraInstrucaoCarregaValor(Symbol simbolo);
 void carregaValorEmpilhaTipo(char* nomeSimbolo);
 void carregaConstanteEmpilhaTipo(char* valor, VarType tipo);
+int tipoNoTopoDaPilha();
 void destroiTodosEscopos();
 void printPilha(Stack pilha, char* nomePilha);
 void printPilhaTipos();

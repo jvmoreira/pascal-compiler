@@ -11,6 +11,9 @@ void handleWhile() {
 }
 
 void avaliaExpressaoWhile() {
+  if(tipoNoTopoDaPilha() != TYPE_BOOL)
+    geraErro("Expressao de while deve avaliar para valor booleano");
+
   int rotuloFimWhile = rotuloNoTopoDaPilha();
   geraInstrucaoDesvio("DSVF", rotuloFimWhile);
 }
@@ -23,6 +26,9 @@ void handleFimWhile() {
 }
 
 void avaliaExpressaoIf() {
+  if(tipoNoTopoDaPilha() != TYPE_BOOL)
+    geraErro("Expressao de if deve avaliar para valor booleano");
+
   int rotuloFimIf = novoRotulo();
   int rotuloElse = novoRotulo();
 
