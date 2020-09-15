@@ -7,6 +7,7 @@ Stack pilhaLValues;
 Stack pilhaTipos;
 Stack pilhaVariaveis;
 Stack pilhaSubrotinas;
+Stack pilhaParametros;
 
 int parametrosEmpilhados;
 int chamadaDeSubrotinaOcorrendo;
@@ -17,6 +18,7 @@ struct {
   int rotulo;
   int numeroDeVariaveis;
   int numeroDeSubrotinas;
+  int numeroDeParametros;
 } escopo;
 
 void iniciaPilhas() {
@@ -25,6 +27,7 @@ void iniciaPilhas() {
   pilhaTipos = newStackWithType(VALUE);
   pilhaVariaveis = newStackWithType(VALUE);
   pilhaSubrotinas = newStackWithType(VALUE);
+  pilhaParametros = newStackWithType(VALUE);
 }
 
 void iniciaEscopo() {
@@ -32,6 +35,7 @@ void iniciaEscopo() {
   escopo.rotulo = -1;
   escopo.numeroDeVariaveis = 0;
   escopo.numeroDeSubrotinas = 0;
+  escopo.numeroDeParametros = 0;
 
   parametrosEmpilhados = 0;
   chamadaDeSubrotinaOcorrendo = 0;
@@ -43,11 +47,13 @@ void iniciaNovoEscopo() {
   empilhaRotulo(escopo.rotulo);
   stackInsertValue(pilhaVariaveis, newStackValue("nVar", escopo.numeroDeVariaveis));
   stackInsertValue(pilhaSubrotinas, newStackValue("nSubRT", escopo.numeroDeSubrotinas));
+  stackInsertValue(pilhaParametros, newStackValue("nParams", escopo.numeroDeParametros));
 
   escopo.atual++;
   escopo.rotulo = novoRotulo();
   escopo.numeroDeVariaveis = 0;
   escopo.numeroDeSubrotinas = 0;
+  escopo.numeroDeParametros = 0;
 }
 
 void handleDesvioParaEscopoAtual() {
@@ -75,11 +81,13 @@ void handleEntradaEscopo() {
 void finalizaEscopoAtual() {
   int nVariaveis = desempilhaIntDaPilha(pilhaVariaveis);
   int nSubrotinas = desempilhaIntDaPilha(pilhaSubrotinas);
+  int nParametros = desempilhaIntDaPilha(pilhaParametros);
 
   escopo.atual--;
   escopo.rotulo = desempilhaRotulo();
   escopo.numeroDeVariaveis = nVariaveis;
   escopo.numeroDeSubrotinas = nSubrotinas;
+  escopo.numeroDeParametros = nParametros;
 }
 
 void adicionaInstrucaoDMEM() {
@@ -91,7 +99,7 @@ void adicionaInstrucaoDMEM() {
 void adicionaInstrucaoRTPR() {
   geraInstrucao("RTPR");
   geraArgumentoInteiro(escopo.atual);
-  geraArgumentoInteiro(0);
+  geraArgumentoInteiro(escopo.numeroDeParametros);
   commitInstrucao();
 }
 
@@ -164,6 +172,7 @@ void handleNovoParametroFormal(char* nomeParametro) {
   validaSimboloNoEscopoAtualOrDie(nomeParametro);
   adicionaParametroFormalNaTabelaDeSimbolos(nomeParametro);
   addParameterToSymbol(simboloGlobal, newParameter(categoriaParametrosFormais));
+  escopo.numeroDeParametros++;
   simboloGlobal->numberOfParameters++;
 }
 
@@ -296,7 +305,7 @@ void atualizaNivelLexicoDosParametrosFormais() {
 
   StackItem itemAtual = tabelaDeSimbolos->top;
   Symbol simboloAtual = extractSymbol(itemAtual);
-  for(int i = 0; i < simboloGlobal->numberOfParameters; ++i) {
+  for(int i = 0; i < escopo.numeroDeParametros; ++i) {
     simboloAtual->shift = deslocamento--;
 
     itemAtual = itemAtual->previous;
@@ -386,6 +395,7 @@ void destroiPilhas() {
   destroyStack(pilhaTipos);
   destroyStack(pilhaVariaveis);
   destroyStack(pilhaSubrotinas);
+  destroyStack(pilhaParametros);
 }
 
 void destroiTodosEscopos() {
