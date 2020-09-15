@@ -126,6 +126,11 @@ Symbol buscaSimboloOrDie(char* nomeSimbolo) {
   return symbol;
 }
 
+void handleNegaBool() {
+  empilhaTipo("NEGA", TYPE_BOOL);
+  validaTipoAplicaOperacao("NEGA", TYPE_BOOL);
+}
+
 void handleInverteValor() {
   empilhaTipo("INVR", TYPE_INT);
   validaTipoAplicaOperacao("INVR", TYPE_INT);

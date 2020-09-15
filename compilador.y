@@ -229,7 +229,7 @@ fator:
     variavel
   | NUMERO { carregaConstanteEmpilhaTipo(token, TYPE_INT); }
   | ABRE_PARENTESES expressao FECHA_PARENTESES
-  | NOT fator
+  | NOT fator { handleNegaBool(); }
 ;
 
 variavel:

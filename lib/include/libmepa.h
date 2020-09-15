@@ -34,6 +34,7 @@ void handleEntradaEscopo();
 void handleSaidaEscopo();
 void configuraDeclaracaoVariaveis();
 void handleNovaVariavel(char* nome);
+void handleNegaBool();
 void handleInverteValor();
 void handleNovaLeitura(char* simbolo);
 void handleNovaEscrita(char* simbolo);
