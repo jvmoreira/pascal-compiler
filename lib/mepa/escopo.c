@@ -107,23 +107,39 @@ void handleSaidaEscopo() {
   finalizaEscopoAtual();
 }
 
-void handleNovaVariavel(char* variavel) {
-  escopo.numeroDeVariaveis++;
-
-  Symbol simbolo = newSymbol(variavel);
-  simbolo->type = TYPE_UNDEFINED;
-  simbolo->category = CAT_VARIABLE;
-  simbolo->lexicalLevel = escopo.atual;
-  simbolo->shift = escopo.numeroDeVariaveis - 1;
-  stackInsertSymbol(tabelaDeSimbolos, simbolo);
+Symbol buscaSimbolo(char* nomeSimbolo) {
+  return stackSearchSymbol(tabelaDeSimbolos, nomeSimbolo);
 }
 
 Symbol buscaSimboloOrDie(char* nomeSimbolo) {
-  Symbol symbol = stackSearchSymbol(tabelaDeSimbolos, nomeSimbolo);
+  Symbol symbol = buscaSimbolo(nomeSimbolo);
   if(!symbol)
     geraErro("Simbolo não declarado");
 
   return symbol;
+}
+
+int simboloExisteNoEscopoAtual(char* nomeSimbolo) {
+  Symbol simboloExistente = buscaSimbolo(nomeSimbolo);
+
+  return simboloExistente && (simboloExistente->lexicalLevel == escopo.atual);
+}
+
+void validaSimboloNoEscopoAtualOrDie(char* nomeSimbolo) {
+  if(simboloExisteNoEscopoAtual(nomeSimbolo))
+    geraErro("Redeclaracao de simbolo");
+}
+
+void handleNovaVariavel(char* nomeVariavel) {
+  validaSimboloNoEscopoAtualOrDie(nomeVariavel);
+  escopo.numeroDeVariaveis++;
+
+  Symbol variavel = newSymbol(nomeVariavel);
+  variavel->type = TYPE_UNDEFINED;
+  variavel->category = CAT_VARIABLE;
+  variavel->lexicalLevel = escopo.atual;
+  variavel->shift = escopo.numeroDeVariaveis - 1;
+  stackInsertSymbol(tabelaDeSimbolos, variavel);
 }
 
 void handleNegaBool() {
@@ -159,6 +175,7 @@ void adicionaProcedimentoTabelaDeSimbolos(char* nomeProcedimento) {
 }
 
 void handleNovoProcedimento(char* nomeProcedimento) {
+  validaSimboloNoEscopoAtualOrDie(nomeProcedimento);
   escopo.numeroDeSubrotinas++;
   iniciaNovoEscopo();
   adicionaProcedimentoTabelaDeSimbolos(nomeProcedimento);

@@ -1,8 +1,6 @@
 #ifndef __MEPA_TYPES__
 #define __MEPA_TYPES__
 
-#define TAM_TOKEN 16
-
 typedef enum {
   s_program, s_var, s_integer, s_bool, s_label, s_numero, s_type, s_array, s_of, s_begin, s_end,
   s_procedure, s_function, s_read, s_write, s_goto, s_if, s_then, s_else, s_while, s_do,

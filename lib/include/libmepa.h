@@ -5,6 +5,7 @@
 #include "libstack.h"
 
 #define DEBUG 1
+#define TAM_TOKEN 16
 
 extern Simbolos simbolo, relacao;
 extern char token[TAM_TOKEN];
