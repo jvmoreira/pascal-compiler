@@ -2,10 +2,8 @@
 #include <stdlib.h>
 #include "libmepa.h"
 
-#define TAM_ROTULO 4
 
 int proximoRotulo;
-char rotulo[TAM_ROTULO];
 Stack pilhaRotulos;
 
 void iniciaRotulos() {
@@ -31,13 +29,7 @@ int rotuloNoTopoDaPilha() {
 }
 
 int desempilhaRotulo() {
-  StackValue conteudo = stackPopValue(pilhaRotulos);
-  if(!conteudo)
-    geraErro("#desempilhaRotulo");
-
-  int rotulo = conteudo->value;
-  destroyStackValue(conteudo);
-  return rotulo;
+  return desempilhaIntDaPilha(pilhaRotulos);
 }
 
 void printPilhaRotulos() {

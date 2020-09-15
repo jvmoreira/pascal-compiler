@@ -10,15 +10,16 @@ typedef enum {
 } SymbolCategory;
 
 typedef enum {
-  TYPE_UNDEFINED, TYPE_INT, TYPE_BOOL
+  TYPE_NULL, TYPE_UNDEFINED, TYPE_INT, TYPE_BOOL
 } VarType;
 
 typedef struct {
   String name;
   SymbolCategory category;
   VarType type;
-  short lexicalLevel;
-  short shift;
+  int lexicalLevel;
+  int shift;
+  int label;
 } _Symbol;
 typedef _Symbol* Symbol;
 

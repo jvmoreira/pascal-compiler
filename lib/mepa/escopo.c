@@ -9,7 +9,9 @@ Stack pilhaSubrotinas;
 
 struct {
   int atual;
+  int rotulo;
   int numeroDeVariaveis;
+  int numeroDeSubrotinas;
 } escopo;
 
 void iniciaPilhas() {
@@ -20,10 +22,89 @@ void iniciaPilhas() {
 }
 
 void iniciaEscopo() {
-  escopo.atual = 0;
+  escopo.atual = -1;
+  escopo.rotulo = -1;
   escopo.numeroDeVariaveis = 0;
+  escopo.numeroDeSubrotinas = 0;
 
   iniciaPilhas();
+}
+
+void iniciaNovoEscopo() {
+  empilhaRotulo(escopo.rotulo);
+  stackInsertValue(pilhaVariaveis, newStackValue("nVar", escopo.numeroDeVariaveis));
+  stackInsertValue(pilhaSubrotinas, newStackValue("nSubRT", escopo.numeroDeSubrotinas));
+
+  escopo.atual++;
+  escopo.rotulo = novoRotulo();
+  escopo.numeroDeVariaveis = 0;
+  escopo.numeroDeSubrotinas = 0;
+}
+
+void handleDesvioParaEscopoAtual() {
+  geraInstrucaoDesvio("DSVS", escopo.rotulo);
+}
+
+int escopoProgramaPrincipal() {
+  return escopo.atual == 0;
+}
+
+void geraInstrucaoENPR() {
+  geraInstrucaoComRotulo("ENPR", escopo.rotulo);
+  geraArgumentoInteiro(escopo.atual);
+}
+
+void handleEntradaEscopo() {
+  if(escopoProgramaPrincipal())
+    geraInstrucaoComRotulo("NADA", escopo.rotulo);
+  else
+    geraInstrucaoENPR();
+
+  commitInstrucao();
+}
+
+void finalizaEscopoAtual() {
+  int nVariaveis = desempilhaIntDaPilha(pilhaVariaveis);
+  int nSubrotinas = desempilhaIntDaPilha(pilhaSubrotinas);
+
+  escopo.atual--;
+  escopo.rotulo = desempilhaRotulo();
+  escopo.numeroDeVariaveis = nVariaveis;
+  escopo.numeroDeSubrotinas = nSubrotinas;
+}
+
+void adicionaInstrucaoDMEM() {
+  geraInstrucao("DMEM");
+  geraArgumentoInteiro(escopo.numeroDeVariaveis);
+  commitInstrucao();
+}
+
+void adicionaInstrucaoRTPR() {
+  geraInstrucao("RTPR");
+  geraArgumentoInteiro(escopo.atual);
+  geraArgumentoInteiro(0);
+  commitInstrucao();
+}
+
+void removeSubrotinasLocaisTabelaSimbolos() {
+  for(int i = 0; i < escopo.numeroDeSubrotinas; ++i)
+    destroySymbol(stackPopSymbol(tabelaDeSimbolos));
+}
+
+void removeVariaveisLocaisTabelaSimbolos() {
+  for(int i = 0; i < escopo.numeroDeVariaveis; ++i)
+    destroySymbol(stackPopSymbol(tabelaDeSimbolos));
+}
+
+void handleSaidaEscopo() {
+  adicionaInstrucaoDMEM();
+  removeSubrotinasLocaisTabelaSimbolos();
+  removeVariaveisLocaisTabelaSimbolos();
+
+  if(!escopoProgramaPrincipal())
+    adicionaInstrucaoRTPR();
+
+  finalizaEscopoAtual();
 }
 
 void handleNovaVariavel(char* variavel) {
@@ -63,31 +144,50 @@ void handleNovaEscrita(char* nomeSimbolo) {
   geraInstrucaoUnica("IMPR");
 }
 
-void adicionaTipoAosSimbolos(VarType tipo) {
-  if(tabelaDeSimbolos->length < escopo.numeroDeVariaveis)
-    geraErro("#adicionaTipoAosSimbolos");
+void adicionaProcedimentoTabelaDeSimbolos(char* nomeProcedimento) {
+  Symbol procedimento = newSymbol(nomeProcedimento);
+  procedimento->type = TYPE_NULL;
+  procedimento->category = CAT_PROCEDURE;
+  procedimento->lexicalLevel = escopo.atual;
+  procedimento->label = escopo.rotulo;
+  stackInsertSymbol(tabelaDeSimbolos, procedimento);
+}
 
+void handleNovoProcedimento(char* nomeProcedimento) {
+  escopo.numeroDeSubrotinas++;
+  iniciaNovoEscopo();
+  adicionaProcedimentoTabelaDeSimbolos(nomeProcedimento);
+}
+
+void adicionaInstrucaoAMEM(int numeroDeVariaveis) {
+  geraInstrucao("AMEM");
+  geraArgumentoInteiro(numeroDeVariaveis);
+  commitInstrucao();
+}
+
+int variavelComTipoIndefinido(Symbol simbolo) {
+  return simbolo
+    && simbolo->type == TYPE_UNDEFINED
+    && simbolo->category == CAT_VARIABLE;
+}
+
+void adicionaTipoAosSimbolosGeraAMEM(VarType tipo) {
+  if(tabelaDeSimbolos->length < escopo.numeroDeVariaveis)
+    geraErro("#adicionaTipoAosSimbolosGeraAMEM");
+
+  int variaveisParaAlocar = 0;
   StackItem itemAtual = tabelaDeSimbolos->top;
   Symbol simboloAtual = extractSymbol(itemAtual);
 
-  while(simboloAtual && simboloAtual->type == TYPE_UNDEFINED) {
+  while(variavelComTipoIndefinido(simboloAtual)) {
     simboloAtual->type = tipo;
+    variaveisParaAlocar++;
 
     itemAtual = itemAtual->previous;
     simboloAtual = extractSymbol(itemAtual);
   }
-}
 
-void adicionaInstrucaoAMEM() {
-  geraInstrucao("AMEM");
-  geraArgumentoInteiro(escopo.numeroDeVariaveis);
-  commitInstrucao();
-}
-
-void adicionaInstrucaoDMEM() {
-  geraInstrucao("DMEM");
-  geraArgumentoInteiro(escopo.numeroDeVariaveis);
-  commitInstrucao();
+  adicionaInstrucaoAMEM(variaveisParaAlocar);
 }
 
 void empilhaTipo(char* nome, int tipo) {
@@ -95,12 +195,7 @@ void empilhaTipo(char* nome, int tipo) {
 }
 
 int desempilhaTipo() {
-  StackValue value = stackPopValue(pilhaTipos);
-  if(!value)
-    geraErro("#desempilhaTipo");
-  int tipo = value->value;
-  destroyStackValue(value);
-  return tipo;
+  return desempilhaIntDaPilha(pilhaTipos);
 }
 
 void salvaLValue(char* nomeSimbolo) {
@@ -166,11 +261,14 @@ void carregaConstanteEmpilhaTipo(char* constante, VarType tipo) {
 }
 
 void destroiPilhas() {
-  // printTabelaDeSimbolos();
   destroyStack(tabelaDeSimbolos);
   destroyStack(pilhaTipos);
   destroyStack(pilhaVariaveis);
   destroyStack(pilhaSubrotinas);
+}
+
+void destroiTodosEscopos() {
+  destroiPilhas();
 }
 
 void printPilha(Stack pilha, char* nomePilha) {
@@ -197,8 +295,8 @@ void printTabelaDeSimbolos() {
 
   printf("TABELA DE SIMBOLOS\n");
   while(simboloAtual) {
-    printf("\tNOME\t\tTIPO\t\tNV LEX\t\tDESLOC\n");
-    printf("\t%s\t\t%i\t\t%i\t\t%i\n\n", simboloAtual->name, simboloAtual->type, simboloAtual->lexicalLevel, simboloAtual->shift);
+    printf("\tNOME\tTIPO\tCAT\tNV LEX\tDESLOC\n");
+    printf("\t%s\t%i\t%i\t%i\t%i\n\n", simboloAtual->name, simboloAtual->type, simboloAtual->category, simboloAtual->lexicalLevel, simboloAtual->shift);
 
     itemAtual = itemAtual->previous;
     simboloAtual = extractSymbol(itemAtual);

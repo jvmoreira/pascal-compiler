@@ -22,40 +22,40 @@ extern char *yytext;
 
 programa:
   { geraInstrucaoUnica("INPP"); }
-  PROGRAM IDENT
+  PROGRAM IDENT { iniciaNovoEscopo(); }
   ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
   bloco PONTO
   { geraInstrucaoUnica("PARA"); }
 ;
 
 bloco:
-  parte_declara_vars
-  { }
-  comando_composto
-  { adicionaInstrucaoDMEM(); }
+    parte_declara_vars
+  { handleDesvioParaEscopoAtual(); }
+    parte_declara_subrotinas
+  { handleEntradaEscopo(); }
+    comando_composto
+  { handleSaidaEscopo(); }
 ;
 
 parte_declara_vars:
-  VAR declara_vars { adicionaInstrucaoAMEM(); }
+  VAR declara_vars
   |
 ;
 
 declara_vars:
-  declara_vars declara_var
+    declara_var declara_vars
   | declara_var
 ;
 
 declara_var:
-  { }
   lista_id_var DOIS_PONTOS tipo
-  { }
   PONTO_E_VIRGULA
 ;
 
 tipo:
-  INTEGER { adicionaTipoAosSimbolos(TYPE_INT); }
-  | BOOL { adicionaTipoAosSimbolos(TYPE_BOOL); }
-  | IDENT { geraErro("Tipo não suportado"); }
+    INTEGER { adicionaTipoAosSimbolosGeraAMEM(TYPE_INT); }
+  | BOOL    { adicionaTipoAosSimbolosGeraAMEM(TYPE_BOOL); }
+  | IDENT   { geraErro("Tipo não suportado"); }
 ;
 
 lista_id_var:
@@ -67,6 +67,48 @@ lista_id_var:
 lista_idents:
   lista_idents VIRGULA IDENT
   | IDENT
+;
+
+parte_declara_subrotinas:
+  declara_procedimentos_ou_nada
+  declara_funcoes_ou_nada
+;
+
+declara_procedimentos_ou_nada:
+  declara_procedimentos |
+;
+
+declara_funcoes_ou_nada:
+  declara_funcoes |
+;
+
+declara_procedimentos:
+    declara_procedimento declara_procedimentos
+  | declara_procedimento
+;
+
+declara_procedimento:
+  PROCEDURE IDENT { handleNovoProcedimento(token); }
+  parametros_formais
+  PONTO_E_VIRGULA
+  bloco PONTO_E_VIRGULA
+;
+
+declara_funcoes:
+    declara_funcao declara_funcoes
+  | declara_funcao
+;
+
+declara_funcao:
+  FUNCTION IDENT parametros_formais DOIS_PONTOS IDENT PONTO_E_VIRGULA bloco PONTO_E_VIRGULA
+;
+
+parametros_formais:
+  lista_parametros_formais |
+;
+
+lista_parametros_formais:
+  ABRE_PARENTESES FECHA_PARENTESES
 ;
 
 comando_composto:

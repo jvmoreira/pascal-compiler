@@ -69,14 +69,25 @@ void commitInstrucao() {
   argumentos = 0;
 }
 
+int desempilhaIntDaPilha(Stack stack) {
+  StackValue valueWrapper = stackPopValue(stack);
+  if(!valueWrapper)
+    geraErro("#desempilhaValorDaPilha");
+
+  int value = valueWrapper->value;
+  destroyStackValue(valueWrapper);
+
+  return value;
+}
+
 void finalizaCompilador() {
   fclose(arquivoSaida);
 
-  destroiPilhas();
+  destroiTodosEscopos();
   finalizaRotulos();
 }
 
-int geraErro(char* erro) {
+void geraErro(char* erro) {
   fprintf (stderr, "Erro na linha %d - %s\n", linhaAtual, erro);
   finalizaCompilador();
   exit(-1);
