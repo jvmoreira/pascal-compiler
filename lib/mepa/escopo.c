@@ -102,10 +102,16 @@ void removeVariaveisLocaisTabelaSimbolos() {
     destroySymbol(stackPopSymbol(tabelaDeSimbolos));
 }
 
+void removeParametrosReaisTabelaSimbolos() {
+  for(int i = 0; i < escopo.numeroDeParametros; ++i)
+    destroySymbol(stackPopSymbol(tabelaDeSimbolos));
+}
+
 void handleSaidaEscopo() {
   adicionaInstrucaoDMEM();
   removeSubrotinasLocaisTabelaSimbolos();
   removeVariaveisLocaisTabelaSimbolos();
+  removeParametrosReaisTabelaSimbolos();
 
   if(!escopoProgramaPrincipal())
     adicionaInstrucaoRTPR();
