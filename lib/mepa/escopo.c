@@ -232,6 +232,9 @@ void geraInstrucaoCHPR() {
 }
 
 void handleChamadaDeSubrotina() {
+  if(parametrosEmpilhados < simboloGlobal->numberOfParameters)
+    geraErro("Numero incorreto de parametros na chamada de subrotina");
+
   geraInstrucaoCHPR();
   parametrosEmpilhados = 0;
   chamadaDeSubrotinaOcorrendo = 0;
@@ -351,6 +354,10 @@ void armazenaResultadoEmLValue() {
 int validaTipoOperacao() {
   int tipo1 = desempilhaTipo();
   int tipo2 = desempilhaTipo();
+
+  if(tipo1 == TYPE_ADDR && chamadaDeSubrotinaOcorrendo)
+    geraErro("Parametro passado por referencia deve ser variavel");
+
   return tipo1 == tipo2;
 }
 
@@ -365,6 +372,27 @@ void validaTipoAplicaOperacao(char* operacao, VarType tipoOperacao) {
 void geraInstrucaoCarregaValor(Symbol simbolo) {
   int valorIndireto = simbolo->category == CAT_PARAM_REF;
   char *instrucao = valorIndireto ? "CRVI" : "CRVL";
+
+  geraInstrucao(instrucao);
+  geraArgumentoInteiro(simbolo->lexicalLevel);
+  geraArgumentoInteiro(simbolo->shift);
+  commitInstrucao();
+}
+
+Parameter parametroAtual() {
+  Parameter param = simboloGlobal->parameters;
+  for(int i = 0; i < parametrosEmpilhados; ++i)
+    param = param->next;
+  return param;
+}
+
+void carregaParametroRealEmpilhaTipo(Symbol simbolo) {
+  Parameter param = parametroAtual();
+  int passagemPorReferencia = param->category == CAT_PARAM_REF;
+
+  char *instrucao = passagemPorReferencia ? "CREN" : "CRVL";
+  empilhaTipo(simbolo->name, passagemPorReferencia ? TYPE_ADDR : simbolo->type);
+
   geraInstrucao(instrucao);
   geraArgumentoInteiro(simbolo->lexicalLevel);
   geraArgumentoInteiro(simbolo->shift);
@@ -374,11 +402,23 @@ void geraInstrucaoCarregaValor(Symbol simbolo) {
 void carregaValorEmpilhaTipo(char* nomeSimbolo) {
   Symbol simbolo = buscaSimboloOrDie(nomeSimbolo);
 
-  geraInstrucaoCarregaValor(simbolo);
-  empilhaTipo(simbolo->name, simbolo->type);
+  if(chamadaDeSubrotinaOcorrendo) {
+    carregaParametroRealEmpilhaTipo(simbolo);
+  } else {
+    geraInstrucaoCarregaValor(simbolo);
+    empilhaTipo(simbolo->name, simbolo->type);
+  }
+}
+
+void validaParametroPorValorOrDie() {
+  if(parametroAtual()->category != CAT_PARAM_VAL)
+    geraErro("Parametro passado por referencia nao pode ser constante");
 }
 
 void carregaConstante(char* constante) {
+  if(chamadaDeSubrotinaOcorrendo) {
+    validaParametroPorValorOrDie();
+  }
   geraInstrucao("CRCT");
   geraArgumentoString(constante);
   commitInstrucao();
