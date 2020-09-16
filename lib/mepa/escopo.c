@@ -342,6 +342,9 @@ void salvaSimboloOrDie(char* nomeSimbolo) {
 }
 
 void empilhaSimboloComoLValue() {
+  if(simboloGlobal->category == CAT_FUNCTION && simboloGlobal->lexicalLevel != escopo.atual)
+    geraErro("Simbolo nao aceita atribuicao neste escopo");
+
   stackInsertSymbol(pilhaLValues, simboloGlobal);
 }
 
@@ -453,6 +456,9 @@ int tipoNoTopoDaPilha() {
 }
 
 void destroiPilhas() {
+  // Todo o conteúdo de pilhaLValues
+  // será destruido junto com a tabela de simbolos
+  pilhaLValues->top = NULL;
   destroyStack(tabelaDeSimbolos);
   destroyStack(pilhaLValues);
   destroyStack(pilhaTipos);
