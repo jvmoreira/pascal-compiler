@@ -49,6 +49,13 @@ var {
   return VAR;
 }
 
+const {
+  simbolo = s_const;
+  strncpy(token, yytext, TAM_TOKEN);
+  IMPRIME("const ");
+  return CONST;
+}
+
 integer {
   simbolo = s_integer;
   strncpy(token, yytext, TAM_TOKEN);
@@ -134,6 +141,13 @@ read {
 }
 
 write {
+  simbolo = s_write;
+  strncpy(token, yytext, TAM_TOKEN);
+  IMPRIME("write ");
+  return WRITE;
+}
+
+writeln {
   simbolo = s_write;
   strncpy(token, yytext, TAM_TOKEN);
   IMPRIME("write ");

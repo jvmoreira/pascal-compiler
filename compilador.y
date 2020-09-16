@@ -15,7 +15,7 @@ extern char *yytext;
 
 %}
 
-%token PROGRAM VAR INTEGER BOOL LABEL NUMERO TYPE ARRAY OF T_BEGIN
+%token PROGRAM VAR CONST INTEGER BOOL LABEL NUMERO TYPE ARRAY OF T_BEGIN
 %token T_END PROCEDURE FUNCTION READ WRITE GOTO IF THEN ELSE WHILE DO AND OR NOT MULTP DIV
 %token ATRIBUICAO PONTO_E_VIRGULA DOIS_PONTOS SINAL_MAIS SINAL_MENOS SINAL_IGUAL DIFERENTE
 %token MENOR MENOR_IGUAL MAIOR MAIOR_IGUAL VIRGULA PONTO ABRE_PARENTESES FECHA_PARENTESES IDENT
@@ -27,19 +27,34 @@ extern char *yytext;
 
 programa:
   { exec(geraInstrucaoUnica("INPP"), "program"); }
-  PROGRAM IDENT
-  ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
+  PROGRAM IDENT lista_idents_ou_nada PONTO_E_VIRGULA
   bloco PONTO
   { exec(geraInstrucaoUnica("PARA"), "program"); }
 ;
 
 bloco:
+    parte_declara_consts
     parte_declara_vars
   { exec(desviaParaEscopoAtual(), "bloco"); }
     parte_declara_subrotinas
   { exec(adicinaRotuloDoEscopoAtual(), "bloco"); }
     comando_composto
   { exec(handleSaidaEscopo(), "bloco"); }
+;
+
+parte_declara_consts:
+  CONST declara_consts
+  |
+;
+
+declara_consts:
+    define_const PONTO_E_VIRGULA declara_consts
+  | define_const PONTO_E_VIRGULA
+;
+
+define_const:
+  IDENT { exec(handleNovaConstante(token), "define_const"); }
+  SINAL_IGUAL expressao { exec(armazenaResultadoEmConstante(), "define_const"); }
 ;
 
 parte_declara_vars:
@@ -67,6 +82,11 @@ lista_id_var:
   lista_id_var VIRGULA IDENT
   { exec(handleNovaVariavel(token), "lista_id_var"); }
   | IDENT { exec(handleNovaVariavel(token), "lista_id_var"); }
+;
+
+lista_idents_ou_nada:
+  ABRE_PARENTESES lista_idents FECHA_PARENTESES
+  |
 ;
 
 lista_idents:

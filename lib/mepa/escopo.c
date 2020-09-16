@@ -154,6 +154,13 @@ void handleNovaVariavel(char* nomeVariavel) {
   stackInsertSymbol(tabelaDeSimbolos, variavel);
 }
 
+void handleNovaConstante(char* nomeConstante) {
+  adicionaInstrucaoAMEM(1);
+  handleNovaVariavel(nomeConstante);
+  salvaLValueOrDie(nomeConstante);
+  LValue->category = CAT_CONST;
+}
+
 void adicionaParametroFormalNaTabelaDeSimbolos(char* nomeParametro) {
   Symbol parametro = newSymbol(nomeParametro);
   parametro->type = TYPE_UNDEFINED;
@@ -386,12 +393,22 @@ void geraInstrucaoArmazena() {
 }
 
 void armazenaResultadoEmLValue() {
+  if(LValue->category == CAT_CONST)
+    geraErro("Constante nao pode ter seu valor alterado");
+
   int tipoResultado = desempilhaTipo();
 
   if(tipoResultado != (int)LValue->type)
     geraErro("Atribuicao com tipos incompativeis");
 
   geraInstrucaoArmazena();
+}
+
+// Ao armazenar o valor da constante
+// o simbolo referente a ela ja esta em LValue
+void armazenaResultadoEmConstante() {
+  geraInstrucaoArmazena();
+  LValue->type = desempilhaTipo();
 }
 
 int validaTipoOperacao() {
@@ -437,6 +454,9 @@ void carregaParametroRealEmpilhaTipo(Symbol simbolo) {
   int passagemPorReferencia = param->category == CAT_PARAM_REF;
   int variavelPassadaPorReferencia = simbolo->category == CAT_PARAM_REF;
   int deveCarregarEndereco = passagemPorReferencia && !variavelPassadaPorReferencia;
+
+  if(deveCarregarEndereco && simbolo->category == CAT_CONST)
+    geraErro("Constante nao pode ser passada como referencia");
 
   char *instrucao = deveCarregarEndereco ? "CREN" : "CRVL";
   empilhaTipo(simbolo->name, passagemPorReferencia ? TYPE_ADDR : simbolo->type);
