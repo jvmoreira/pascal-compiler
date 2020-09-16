@@ -80,10 +80,10 @@ void adicionaInstrucaoAMEM(int numeroDeVariaveis) {
   commitInstrucao();
 }
 
-int desempilhaIntDaPilha(Stack stack) {
+int desempilhaIntDaPilha(Stack stack, char* mensagemErro) {
   StackValue valueWrapper = stackPopValue(stack);
   if(!valueWrapper)
-    geraErro("#desempilhaValorDaPilha");
+    geraErro(mensagemErro);
 
   int value = valueWrapper->value;
   destroyStackValue(valueWrapper);

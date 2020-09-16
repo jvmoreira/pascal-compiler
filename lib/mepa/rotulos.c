@@ -29,7 +29,7 @@ int rotuloNoTopoDaPilha() {
 }
 
 int desempilhaRotulo() {
-  return desempilhaIntDaPilha(pilhaRotulos);
+  return desempilhaIntDaPilha(pilhaRotulos, "#desempilhaRotulo");
 }
 
 void printPilhaRotulos() {

@@ -7,6 +7,11 @@ int yyerror(char*);
 
 extern char *yytext;
 #define printToken printf("\n\nToken: %s\n\n", yytext);
+#if DEBUG >= 3
+#define exec(cmd, str) cmd; printf("%s\n", str);
+#else
+#define exec(cmd, str) cmd;
+#endif
 
 %}
 
@@ -21,20 +26,20 @@ extern char *yytext;
 %%
 
 programa:
-  { geraInstrucaoUnica("INPP"); }
+  { exec(geraInstrucaoUnica("INPP"), "program"); }
   PROGRAM IDENT
   ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
   bloco PONTO
-  { geraInstrucaoUnica("PARA"); }
+  { exec(geraInstrucaoUnica("PARA"), "program"); }
 ;
 
 bloco:
     parte_declara_vars
-  { desviaParaEscopoAtual(); }
+  { exec(desviaParaEscopoAtual(), "bloco"); }
     parte_declara_subrotinas
-  { adicinaRotuloDoEscopoAtual(); }
+  { exec(adicinaRotuloDoEscopoAtual(), "bloco"); }
     comando_composto
-  { handleSaidaEscopo(); }
+  { exec(handleSaidaEscopo(), "bloco"); }
 ;
 
 parte_declara_vars:
@@ -53,15 +58,15 @@ declara_var:
 ;
 
 tipo_variavel:
-    INTEGER { adicionaTipoAosSimbolosGeraAMEM(TYPE_INT); }
-  | BOOL    { adicionaTipoAosSimbolosGeraAMEM(TYPE_BOOL); }
-  | IDENT   { geraErro("Tipo não suportado"); }
+    INTEGER { exec(adicionaTipoAosSimbolosGeraAMEM(TYPE_INT), "tipo_variavel"); }
+  | BOOL    { exec(adicionaTipoAosSimbolosGeraAMEM(TYPE_BOOL), "tipo_variavel"); }
+  | IDENT   { exec(geraErro("Tipo não suportado"), "tipo_variavel"); }
 ;
 
 lista_id_var:
   lista_id_var VIRGULA IDENT
-  { handleNovaVariavel(token); }
-  | IDENT { handleNovaVariavel(token); }
+  { exec(handleNovaVariavel(token), "lista_id_var"); }
+  | IDENT { exec(handleNovaVariavel(token), "lista_id_var"); }
 ;
 
 lista_idents:
@@ -88,7 +93,7 @@ declara_procedimentos:
 ;
 
 declara_procedimento:
-  PROCEDURE IDENT { handleNovoProcedimento(token); }
+  PROCEDURE IDENT { exec(handleNovoProcedimento(token), "declara_procedimento"); }
   parametros_formais_ou_nada PONTO_E_VIRGULA
   bloco PONTO_E_VIRGULA
 ;
@@ -99,21 +104,21 @@ declara_funcoes:
 ;
 
 declara_funcao:
-  FUNCTION IDENT { handleNovaFuncao(token); }
+  FUNCTION IDENT { exec(handleNovaFuncao(token), "declara_funcao"); }
   parametros_formais_ou_nada
   DOIS_PONTOS tipo_funcao PONTO_E_VIRGULA
   bloco PONTO_E_VIRGULA
 ;
 
 tipo_funcao:
-    INTEGER { atualizaTipoNivelLexicoDaFuncao(TYPE_INT); }
-  | BOOL    { atualizaTipoNivelLexicoDaFuncao(TYPE_BOOL); }
-  | IDENT   { geraErro("Tipo de funcao nao suportado"); }
+    INTEGER { exec(atualizaTipoNivelLexicoDaFuncao(TYPE_INT), "tipo_funcao"); }
+  | BOOL    { exec(atualizaTipoNivelLexicoDaFuncao(TYPE_BOOL), "tipo_funcao"); }
+  | IDENT   { exec(geraErro("Tipo de funcao nao suportado"), "tipo_funcao"); }
 ;
 
 parametros_formais_ou_nada:
   ABRE_PARENTESES
-  parametros_formais { atualizaNivelLexicoDosParametrosFormais(); }
+  parametros_formais { exec(atualizaNivelLexicoDosParametrosFormais(), "parametros_formais_ou_nada"); }
   FECHA_PARENTESES
   |
 ;
@@ -124,21 +129,21 @@ parametros_formais:
 ;
 
 secao_parametros_formais:
-  { configuraParametrosFormaisPorValor(); }
+  { exec(configuraParametrosFormaisPorValor(), "secao_parametros_formais"); }
     lista_parametros_formais DOIS_PONTOS tipo_parametro_formal
-  | VAR { configuraParametrosFormaisPorReferencia(); }
+  | VAR { exec(configuraParametrosFormaisPorReferencia(), "secao_parametros_formais"); }
     lista_parametros_formais DOIS_PONTOS tipo_parametro_formal
 ;
 
 lista_parametros_formais:
-    lista_parametros_formais VIRGULA IDENT { handleNovoParametroFormal(token); }
-  | IDENT { handleNovoParametroFormal(token); }
+    lista_parametros_formais VIRGULA IDENT { exec(handleNovoParametroFormal(token), "lista_parametros_formais"); }
+  | IDENT { exec(handleNovoParametroFormal(token), "lista_parametros_formais"); }
 ;
 
 tipo_parametro_formal:
-    INTEGER { adicionaTipoAosParametrosFormais(TYPE_INT); }
-  | BOOL    { adicionaTipoAosParametrosFormais(TYPE_BOOL); }
-  | IDENT   { geraErro("Parametro com tipo não suportado"); }
+    INTEGER { exec(adicionaTipoAosParametrosFormais(TYPE_INT), "tipo_parametro_formal"); }
+  | BOOL    { exec(adicionaTipoAosParametrosFormais(TYPE_BOOL), "tipo_parametro_formal"); }
+  | IDENT   { exec(geraErro("Parametro com tipo não suportado"), "tipo_parametro_formal"); }
 ;
 
 comando_composto:
@@ -172,62 +177,62 @@ comando_sem_rotulo:
 ;
 
 atribuicao_ou_chamada_procedimento:
-  IDENT { salvaSimboloOrDie(token); }
+  IDENT { exec(salvaSimboloOrDie(token), "atribuicao_ou_chamada_procedimento"); }
   decide_atribuicao_ou_chamada_procedimento
 ;
 
 decide_atribuicao_ou_chamada_procedimento:
     atribuicao
-  | chamada_procedimento { handleChamadaDeSubrotina(); }
+  | chamada_procedimento { exec(handleChamadaDeSubrotina(), "decide_atribuicao_ou_chamada_procedimento"); }
 ;
 
 atribuicao:
-    ATRIBUICAO { empilhaSimboloComoLValue(); }
+    ATRIBUICAO { exec(salvaSimboloComoLValue(), "atribuicao"); }
     expressao
-  { armazenaResultadoEmLValue(); }
+  { exec(armazenaResultadoEmLValue(), "atribuicao"); }
 ;
 
 chamada_procedimento:
     ABRE_PARENTESES
-  { handleListaDeParametrosReais(); }
+  { exec(configuraChamadaSubrotina(), "chamada_procedimento"); }
     lista_parametros_reais
     FECHA_PARENTESES
-  | ABRE_PARENTESES FECHA_PARENTESES
-  |
+  | ABRE_PARENTESES { exec(configuraChamadaSubrotina(), "chamada_procedimento"); } FECHA_PARENTESES
+  | { exec(configuraChamadaSubrotina(), "chamada_procedimento"); }
 ;
 
 lista_parametros_reais:
-    expressao { handleNovoParametroReal(); } VIRGULA lista_parametros_reais
-  | expressao { handleNovoParametroReal(); }
+    expressao { exec(handleNovoParametroReal(), "lista_parametros_reais"); } VIRGULA lista_parametros_reais
+  | expressao { exec(handleNovoParametroReal(), "lista_parametros_reais"); }
 ;
 
 params_read:
-    params_read VIRGULA IDENT { handleNovaLeitura(token); }
-  | IDENT { handleNovaLeitura(token); }
+    params_read VIRGULA IDENT { exec(handleNovaLeitura(token), "params_read"); }
+  | IDENT { exec(handleNovaLeitura(token), "params_read"); }
 ;
 
 params_write:
-    params_write VIRGULA IDENT { handleNovaEscrita(token); }
-  | IDENT { handleNovaEscrita(token); }
+    params_write VIRGULA IDENT { exec(handleNovaEscrita(token), "params_write"); }
+  | IDENT { exec(handleNovaEscrita(token), "params_write"); }
 ;
 
 comando_repetitivo:
-  WHILE { handleWhile(); }
-  expressao { avaliaExpressaoWhile(); }
-  DO comando_sem_rotulo { handleFimWhile(); }
+  WHILE { exec(handleWhile(), "comando_repetitivo"); }
+  expressao { exec(avaliaExpressaoWhile(), "comando_repetitivo"); }
+  DO comando_sem_rotulo { exec(handleFimWhile(), "comando_repetitivo"); }
 ;
 
 comando_condicional:
   if_then
   cond_else
-  { handleFimIf(); }
+  { exec(handleFimIf(), "comando_condicional"); }
 ;
 
 if_then:
   IF expressao
-  { avaliaExpressaoIf(); }
+  { exec(avaliaExpressaoIf(), "if_then"); }
    THEN comando_sem_rotulo
-  { handleSaidaIfThen(); }
+  { exec(handleSaidaIfThen(), "if_then"); }
 ;
 
 cond_else:
@@ -236,12 +241,12 @@ cond_else:
 ;
 
 relacao_com_expressao_simples:
-    SINAL_IGUAL   expressao_simples { validaTipoAplicaOperacao("CMIG", TYPE_BOOL); }
-  | DIFERENTE     expressao_simples { validaTipoAplicaOperacao("CMDG", TYPE_BOOL); }
-  | MENOR         expressao_simples { validaTipoAplicaOperacao("CMME", TYPE_BOOL); }
-  | MENOR_IGUAL   expressao_simples { validaTipoAplicaOperacao("CMEG", TYPE_BOOL); }
-  | MAIOR         expressao_simples { validaTipoAplicaOperacao("CMMA", TYPE_BOOL); }
-  | MAIOR_IGUAL   expressao_simples { validaTipoAplicaOperacao("CMAG", TYPE_BOOL); }
+    SINAL_IGUAL   expressao_simples { exec(validaTipoAplicaOperacao("CMIG", TYPE_BOOL), "relacao_com_expressao_simples"); }
+  | DIFERENTE     expressao_simples { exec(validaTipoAplicaOperacao("CMDG", TYPE_BOOL), "relacao_com_expressao_simples"); }
+  | MENOR         expressao_simples { exec(validaTipoAplicaOperacao("CMME", TYPE_BOOL), "relacao_com_expressao_simples"); }
+  | MENOR_IGUAL   expressao_simples { exec(validaTipoAplicaOperacao("CMEG", TYPE_BOOL), "relacao_com_expressao_simples"); }
+  | MAIOR         expressao_simples { exec(validaTipoAplicaOperacao("CMMA", TYPE_BOOL), "relacao_com_expressao_simples"); }
+  | MAIOR_IGUAL   expressao_simples { exec(validaTipoAplicaOperacao("CMAG", TYPE_BOOL), "relacao_com_expressao_simples"); }
 ;
 
 expressao:
@@ -250,7 +255,7 @@ expressao:
 ;
 
 termo_com_sinal_opcional:
-    SINAL_MENOS termo { handleInverteValor(); }
+    SINAL_MENOS termo { exec(handleInverteValor(), "termo_com_sinal_opcional"); }
   | SINAL_MAIS  termo
   | termo
 ;
@@ -266,27 +271,41 @@ operacoes_basicas:
 ;
 
 operacao_basica:
-    SINAL_MAIS  termo { validaTipoAplicaOperacao("SOMA", TYPE_INT); }
-  | SINAL_MENOS termo { validaTipoAplicaOperacao("SUBT", TYPE_INT); }
-  | OR          termo { validaTipoAplicaOperacao("DISJ", TYPE_BOOL); }
+    SINAL_MAIS  termo { exec(validaTipoAplicaOperacao("SOMA", TYPE_INT), "operacao_basica"); }
+  | SINAL_MENOS termo { exec(validaTipoAplicaOperacao("SUBT", TYPE_INT), "operacao_basica"); }
+  | OR          termo { exec(validaTipoAplicaOperacao("DISJ", TYPE_BOOL), "operacao_basica"); }
 ;
 
 termo:
-    fator MULTP fator { validaTipoAplicaOperacao("MULT", TYPE_INT); }
-  | fator DIV   fator { validaTipoAplicaOperacao("DIVI", TYPE_INT); }
-  | fator AND   fator { validaTipoAplicaOperacao("CONJ", TYPE_BOOL); }
+    fator MULTP fator { exec(validaTipoAplicaOperacao("MULT", TYPE_INT), "termo"); }
+  | fator DIV   fator { exec(validaTipoAplicaOperacao("DIVI", TYPE_INT), "termo"); }
+  | fator AND   fator { exec(validaTipoAplicaOperacao("CONJ", TYPE_BOOL), "termo"); }
   | fator
 ;
 
 fator:
-    variavel
-  | NUMERO { carregaConstanteEmpilhaTipo(token, TYPE_INT); }
+    variavel_ou_funcao
+  | NUMERO { exec(carregaConstanteEmpilhaTipo(token, TYPE_INT), "fator"); }
   | ABRE_PARENTESES expressao FECHA_PARENTESES
-  | NOT fator { handleNegaBool(); }
+  | NOT fator { exec(handleNegaBool(), "fator"); }
 ;
 
-variavel:
-  IDENT { carregaValorEmpilhaTipo(token); }
+variavel_ou_funcao:
+  IDENT { exec(salvaSimboloOrDie(token), "variavel_ou_funcao"); }
+  funcao_ou_nada
+;
+
+funcao_ou_nada:
+    chamada_funcao { exec(handleChamadaDeSubrotina(), "funcao_ou_nada"); }
+  | { exec(verificaFuncaoOuVariavel(), "funcao_ou_nada"); }
+;
+
+chamada_funcao:
+    ABRE_PARENTESES
+    { exec(configuraChamadaFuncao(), "chamada_funcao"); }
+    lista_parametros_reais
+    FECHA_PARENTESES
+  | ABRE_PARENTESES { exec(configuraChamadaFuncao(), "chamada_funcao"); } FECHA_PARENTESES
 ;
 
 %%

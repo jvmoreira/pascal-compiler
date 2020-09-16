@@ -1,34 +1,20 @@
 program exemplo75 (input, output);
-var m,n : integer;
-    i: integer;
-    b: bool;
+var m,n :  integer;
+function f ( n : integer; var k:integer ) : integer;
+var p, q : integer;
 begin
-  read(n,m);
-  b := n or 2;
-  b := n > 2;
-  m:=n+(m-7)*4;
-  n := -m + 4;
-  write(m,n);
-
-  n := 0;
-  m := 0;
-  while (n < 5) do
-  begin
-
-    i := 0;
-    while(i < n) do
-    begin
-      write(i);
-      i := i + 1;
-    end;
-
-    m := m+n;
-    n := n + 1;
-  end;
-
-  if(m < 10) then
-    write(m)
-  else
-    write(n);
-
+   if n<2 then
+      begin
+         f:=n; k:=0
+      end
+   else
+      begin
+         f:=f(n,p) + f(n,q);
+         k:=p+q+1
+      end;
+   write (n, k)
+end;
+begin
+   n:=f(3,m);
+   write(n, m)
 end.
