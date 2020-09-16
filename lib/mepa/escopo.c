@@ -201,23 +201,31 @@ void geraInstrucaoENPR() {
   commitInstrucao();
 }
 
-void adicionaProcedimentoNaTabelaDeSimbolos(char* nomeProcedimento) {
+void adicionaSubrotinaNaTabelaDeSimbolos(char* nomeProcedimento, SymbolCategory categoria) {
   Symbol procedimento = newSymbol(nomeProcedimento);
   procedimento->type = TYPE_NULL;
-  procedimento->category = CAT_PROCEDURE;
+  procedimento->category = categoria;
   procedimento->lexicalLevel = escopo.atual + 1;
   procedimento->label = novoRotulo();
   procedimento->numberOfParameters = 0;
   stackInsertSymbol(tabelaDeSimbolos, procedimento);
 }
 
-void handleNovoProcedimento(char* nomeProcedimento) {
-  validaSimboloNoEscopoAtualOrDie(nomeProcedimento);
+void handleNovaSubrotina(char* nomeSubrotina, SymbolCategory categoria) {
+  validaSimboloNoEscopoAtualOrDie(nomeSubrotina);
   escopo.numeroDeSubrotinas++;
-  adicionaProcedimentoNaTabelaDeSimbolos(nomeProcedimento);
+  adicionaSubrotinaNaTabelaDeSimbolos(nomeSubrotina, categoria);
   iniciaNovoEscopo();
-  salvaSimboloOrDie(nomeProcedimento);
+  salvaSimboloOrDie(nomeSubrotina);
   geraInstrucaoENPR();
+}
+
+void handleNovoProcedimento(char* nomeProcedimento) {
+  handleNovaSubrotina(nomeProcedimento, CAT_PROCEDURE);
+}
+
+void handleNovaFuncao(char* nomeFuncao) {
+  handleNovaSubrotina(nomeFuncao, CAT_FUNCTION);
 }
 
 void handleListaDeParametrosReais() {
@@ -248,12 +256,6 @@ void handleChamadaDeSubrotina() {
 
 void adicinaRotuloDoEscopoAtual() {
   geraInstrucaoUnicaComRotulo("NADA", escopo.rotulo);
-}
-
-void adicionaInstrucaoAMEM(int numeroDeVariaveis) {
-  geraInstrucao("AMEM");
-  geraArgumentoInteiro(numeroDeVariaveis);
-  commitInstrucao();
 }
 
 int simboloComTipoIndefinido(Symbol simbolo, SymbolCategory categoria) {
@@ -289,6 +291,11 @@ void configuraParametrosFormaisPorReferencia() {
   categoriaParametrosFormais = CAT_PARAM_REF;
 }
 
+void atualizaTipoNivelLexicoDaFuncao(VarType tipo) {
+  simboloGlobal->type = tipo;
+  simboloGlobal->shift = -4 - simboloGlobal->numberOfParameters;
+}
+
 void adicionaTipoAosParametrosFormais(VarType tipo) {
   StackItem itemAtual = tabelaDeSimbolos->top;
   Symbol simboloAtual = extractSymbol(itemAtual);
@@ -322,7 +329,7 @@ void atualizaNivelLexicoDosParametrosFormais() {
   }
 }
 
-void empilhaTipo(char* nome, int tipo) {
+void empilhaTipo(char* nome, VarType tipo) {
   stackInsertValue(pilhaTipos, newStackValue(nome, tipo));
 }
 

@@ -99,7 +99,16 @@ declara_funcoes:
 ;
 
 declara_funcao:
-  FUNCTION IDENT parametros_formais_ou_nada DOIS_PONTOS IDENT PONTO_E_VIRGULA bloco PONTO_E_VIRGULA
+  FUNCTION IDENT { handleNovaFuncao(token); }
+  parametros_formais_ou_nada
+  DOIS_PONTOS tipo_funcao PONTO_E_VIRGULA
+  bloco PONTO_E_VIRGULA
+;
+
+tipo_funcao:
+    INTEGER { atualizaTipoNivelLexicoDaFuncao(TYPE_INT); }
+  | BOOL    { atualizaTipoNivelLexicoDaFuncao(TYPE_BOOL); }
+  | IDENT   { geraErro("Tipo de funcao nao suportado"); }
 ;
 
 parametros_formais_ou_nada:

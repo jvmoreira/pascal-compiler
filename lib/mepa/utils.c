@@ -74,6 +74,12 @@ void commitInstrucao() {
   argumentos = 0;
 }
 
+void adicionaInstrucaoAMEM(int numeroDeVariaveis) {
+  geraInstrucao("AMEM");
+  geraArgumentoInteiro(numeroDeVariaveis);
+  commitInstrucao();
+}
+
 int desempilhaIntDaPilha(Stack stack) {
   StackValue valueWrapper = stackPopValue(stack);
   if(!valueWrapper)
