@@ -3,24 +3,13 @@
 
 Symbol LValue;
 Symbol simboloGlobal;
-Symbol subrotinaSendoChamada;
 Stack tabelaDeSimbolos;
 Stack pilhaTipos;
 Stack pilhaVariaveis;
 Stack pilhaSubrotinas;
 Stack pilhaParametros;
 
-int parametrosEmpilhados;
-int chamadaDeSubrotinaOcorrendo;
-SymbolCategory categoriaParametrosFormais;
-
-struct {
-  int atual;
-  int rotulo;
-  int numeroDeVariaveis;
-  int numeroDeSubrotinas;
-  int numeroDeParametros;
-} escopo;
+Escopo escopo;
 
 void iniciaPilhas() {
   tabelaDeSimbolos = newStackWithType(SYMBOL);
@@ -38,9 +27,6 @@ void iniciaEscopo() {
   escopo.numeroDeVariaveis = 0;
   escopo.numeroDeSubrotinas = 0;
   escopo.numeroDeParametros = 0;
-
-  parametrosEmpilhados = 0;
-  chamadaDeSubrotinaOcorrendo = 0;
 
   iniciaPilhas();
 }
@@ -85,13 +71,6 @@ void adicionaInstrucaoDMEM() {
   commitInstrucao();
 }
 
-void adicionaInstrucaoRTPR() {
-  geraInstrucao("RTPR");
-  geraArgumentoInteiro(escopo.atual);
-  geraArgumentoInteiro(escopo.numeroDeParametros);
-  commitInstrucao();
-}
-
 void removeSubrotinasLocaisTabelaSimbolos() {
   for(int i = 0; i < escopo.numeroDeSubrotinas; ++i)
     destroySymbol(stackPopSymbol(tabelaDeSimbolos));
@@ -102,19 +81,20 @@ void removeVariaveisLocaisTabelaSimbolos() {
     destroySymbol(stackPopSymbol(tabelaDeSimbolos));
 }
 
-void removeParametrosReaisTabelaSimbolos() {
+void removeParametrosFormaisTabelaSimbolos() {
   for(int i = 0; i < escopo.numeroDeParametros; ++i)
-    destroySymbol(stackPopSymbol(tabelaDeSimbolos));
+  destroySymbol(stackPopSymbol(tabelaDeSimbolos));
 }
+
 
 void handleSaidaEscopo() {
   adicionaInstrucaoDMEM();
   removeSubrotinasLocaisTabelaSimbolos();
   removeVariaveisLocaisTabelaSimbolos();
-  removeParametrosReaisTabelaSimbolos();
+  removeParametrosFormaisTabelaSimbolos();
 
   if(!escopoProgramaPrincipal())
-    adicionaInstrucaoRTPR();
+    geraInstrucaoRTPR();
 
   finalizaEscopoAtual();
 }
@@ -154,23 +134,6 @@ void handleNovaVariavel(char* nomeVariavel) {
   stackInsertSymbol(tabelaDeSimbolos, variavel);
 }
 
-void adicionaParametroFormalNaTabelaDeSimbolos(char* nomeParametro) {
-  Symbol parametro = newSymbol(nomeParametro);
-  parametro->type = TYPE_UNDEFINED;
-  parametro->category = categoriaParametrosFormais;
-  parametro->lexicalLevel = escopo.atual;
-  parametro->shift = 0;
-  stackInsertSymbol(tabelaDeSimbolos, parametro);
-}
-
-void handleNovoParametroFormal(char* nomeParametro) {
-  validaSimboloNoEscopoAtualOrDie(nomeParametro);
-  adicionaParametroFormalNaTabelaDeSimbolos(nomeParametro);
-  addParameterToSymbol(simboloGlobal, newParameter(categoriaParametrosFormais));
-  escopo.numeroDeParametros++;
-  simboloGlobal->numberOfParameters++;
-}
-
 void handleNegaBool() {
   empilhaTipo("NEGA", TYPE_BOOL);
   validaTipoAplicaOperacao("NEGA", TYPE_BOOL);
@@ -192,78 +155,6 @@ void handleNovaEscrita(char* nomeSimbolo) {
   Symbol simbolo = buscaSimboloOrDie(nomeSimbolo);
   geraInstrucaoCarregaValor(simbolo);
   geraInstrucaoUnica("IMPR");
-}
-
-void geraInstrucaoENPR() {
-  geraInstrucaoComRotulo("ENPR", simboloGlobal->label);
-  geraArgumentoInteiro(simboloGlobal->lexicalLevel);
-  commitInstrucao();
-}
-
-void adicionaSubrotinaNaTabelaDeSimbolos(char* nomeProcedimento, SymbolCategory categoria) {
-  Symbol procedimento = newSymbol(nomeProcedimento);
-  procedimento->type = TYPE_NULL;
-  procedimento->category = categoria;
-  procedimento->lexicalLevel = escopo.atual + 1;
-  procedimento->label = novoRotulo();
-  procedimento->numberOfParameters = 0;
-  stackInsertSymbol(tabelaDeSimbolos, procedimento);
-}
-
-void handleNovaSubrotina(char* nomeSubrotina, SymbolCategory categoria) {
-  validaSimboloNoEscopoAtualOrDie(nomeSubrotina);
-  escopo.numeroDeSubrotinas++;
-  adicionaSubrotinaNaTabelaDeSimbolos(nomeSubrotina, categoria);
-  iniciaNovoEscopo();
-  salvaSimboloOrDie(nomeSubrotina);
-  geraInstrucaoENPR();
-}
-
-void handleNovoProcedimento(char* nomeProcedimento) {
-  handleNovaSubrotina(nomeProcedimento, CAT_PROCEDURE);
-}
-
-void handleNovaFuncao(char* nomeFuncao) {
-  handleNovaSubrotina(nomeFuncao, CAT_FUNCTION);
-}
-
-void configuraChamadaSubrotina() {
-  chamadaDeSubrotinaOcorrendo = 1;
-  subrotinaSendoChamada = simboloGlobal;
-}
-
-void configuraChamadaFuncao() {
-  adicionaInstrucaoAMEM(1);
-  configuraChamadaSubrotina();
-}
-
-void handleNovoParametroReal() {
-  parametrosEmpilhados++;
-  if(parametrosEmpilhados > subrotinaSendoChamada->numberOfParameters)
-    geraErro("Numero incorreto (maior) de parametros na chamada de subrotina");
-}
-
-void geraInstrucaoCHPR() {
-  geraInstrucao("CHPR");
-  geraArgumentoRotulo(subrotinaSendoChamada->label);
-  geraArgumentoInteiro(escopo.atual);
-  commitInstrucao();
-}
-
-void handleChamadaDeSubrotina() {
-  if(parametrosEmpilhados < subrotinaSendoChamada->numberOfParameters)
-    geraErro("Numero incorreto de parametros na chamada de subrotina");
-
-
-  for(int i = 0; i < parametrosEmpilhados; ++i)
-    desempilhaTipo();
-
-  if(subrotinaSendoChamada->category == CAT_FUNCTION)
-    empilhaTipo("Func", subrotinaSendoChamada->type);
-
-  geraInstrucaoCHPR();
-  parametrosEmpilhados = 0;
-  chamadaDeSubrotinaOcorrendo = 0;
 }
 
 void adicinaRotuloDoEscopoAtual() {
@@ -293,52 +184,6 @@ void adicionaTipoAosSimbolosGeraAMEM(VarType tipo) {
   }
 
   adicionaInstrucaoAMEM(variaveisParaAlocar);
-}
-
-void configuraParametrosFormaisPorValor() {
-  categoriaParametrosFormais = CAT_PARAM_VAL;
-}
-
-void configuraParametrosFormaisPorReferencia() {
-  categoriaParametrosFormais = CAT_PARAM_REF;
-}
-
-void atualizaTipoNivelLexicoDaFuncao(VarType tipo) {
-  simboloGlobal->type = tipo;
-  simboloGlobal->shift = -4 - simboloGlobal->numberOfParameters;
-}
-
-void adicionaTipoAosParametrosFormais(VarType tipo) {
-  StackItem itemAtual = tabelaDeSimbolos->top;
-  Symbol simboloAtual = extractSymbol(itemAtual);
-
-  while(simboloComTipoIndefinido(simboloAtual, categoriaParametrosFormais)) {
-    simboloAtual->type = tipo;
-
-    itemAtual = itemAtual->previous;
-    simboloAtual = extractSymbol(itemAtual);
-  }
-
-  Parameter paramAtual = simboloGlobal->parameters;
-  while(paramAtual) {
-    if(paramAtual->type == TYPE_UNDEFINED)
-      paramAtual->type = tipo;
-
-    paramAtual = paramAtual->next;
-  }
-}
-
-void atualizaNivelLexicoDosParametrosFormais() {
-  int deslocamento = -4;
-
-  StackItem itemAtual = tabelaDeSimbolos->top;
-  Symbol simboloAtual = extractSymbol(itemAtual);
-  for(int i = 0; i < escopo.numeroDeParametros; ++i) {
-    simboloAtual->shift = deslocamento--;
-
-    itemAtual = itemAtual->previous;
-    simboloAtual = extractSymbol(itemAtual);
-  }
 }
 
 void verificaFuncaoOuVariavel() {
@@ -422,31 +267,6 @@ void geraInstrucaoCarregaValor(Symbol simbolo) {
   commitInstrucao();
 }
 
-Parameter parametroAtual() {
-  Parameter param = subrotinaSendoChamada->parameters;
-  for(int i = 0; i < parametrosEmpilhados; ++i)
-    param = param->next;
-
-  if(!param)
-    geraErro("#parametroAtual");
-  return param;
-}
-
-void carregaParametroRealEmpilhaTipo(Symbol simbolo) {
-  Parameter param = parametroAtual();
-  int passagemPorReferencia = param->category == CAT_PARAM_REF;
-  int variavelPassadaPorReferencia = simbolo->category == CAT_PARAM_REF;
-  int deveCarregarEndereco = passagemPorReferencia && !variavelPassadaPorReferencia;
-
-  char *instrucao = deveCarregarEndereco ? "CREN" : "CRVL";
-  empilhaTipo(simbolo->name, passagemPorReferencia ? TYPE_ADDR : simbolo->type);
-
-  geraInstrucao(instrucao);
-  geraArgumentoInteiro(simbolo->lexicalLevel);
-  geraArgumentoInteiro(simbolo->shift);
-  commitInstrucao();
-}
-
 void carregaValorEmpilhaTipo(char* nomeSimbolo) {
   Symbol simbolo = buscaSimboloOrDie(nomeSimbolo);
 
@@ -456,11 +276,6 @@ void carregaValorEmpilhaTipo(char* nomeSimbolo) {
     geraInstrucaoCarregaValor(simbolo);
     empilhaTipo(simbolo->name, simbolo->type);
   }
-}
-
-void validaParametroPorValorOrDie() {
-  if(parametroAtual()->category != CAT_PARAM_VAL)
-    geraErro("Parametro passado por referencia nao pode ser constante");
 }
 
 void carregaConstante(char* constante) {

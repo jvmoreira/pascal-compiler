@@ -2,17 +2,17 @@ CFLAGS = -Wall -Wextra -Werror -I include
 
 LIB = libmepa.a
 
-MEPA_FILES = mepa/utils \
-		mepa/escopo      \
-		mepa/rotulos     \
-		mepa/desvios
+MEPA_FILES = mepa/escopo \
+		mepa/subrotinas \
+		mepa/desvios    \
+		mepa/utils
 
-STACK_FILES = stack/helpers \
-		stack/parameter  \
-		stack/symbol     \
-		stack/value      \
+STACK_FILES = stack/stack \
 		stack/item       \
-		stack/stack
+		stack/value      \
+		stack/symbol     \
+		stack/parameter  \
+		stack/helpers
 
 FILES = $(MEPA_FILES) $(STACK_FILES)
 

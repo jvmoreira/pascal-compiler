@@ -10,6 +10,12 @@
 extern Simbolos simbolo, relacao;
 extern char token[TAM_TOKEN];
 
+extern Symbol simboloGlobal;
+extern Stack tabelaDeSimbolos;
+extern Escopo escopo;
+
+extern int chamadaDeSubrotinaOcorrendo;
+
 /* ==================
  * == UTILS ========= */
 void iniciaCompilador();
@@ -34,25 +40,16 @@ void iniciaEscopo();
 void iniciaNovoEscopo();
 void desviaParaEscopoAtual();
 void handleSaidaEscopo();
+void validaSimboloNoEscopoAtualOrDie(char* nomeSimbolo);
+int simboloComTipoIndefinido(Symbol simbolo, SymbolCategory categoria);
 void handleNovaVariavel(char* nomeVariavel);
 void handleNovoParametroFormal(char* nomeParametro);
 void handleNegaBool();
 void handleInverteValor();
 void handleNovaLeitura(char* simbolo);
 void handleNovaEscrita(char* simbolo);
-void handleNovoProcedimento(char* nomeProcedimento);
-void handleNovaFuncao(char* nomeFuncao);
-void configuraChamadaSubrotina();
-void configuraChamadaFuncao();
-void handleNovoParametroReal();
-void handleChamadaDeSubrotina();
 void adicinaRotuloDoEscopoAtual();
 void adicionaTipoAosSimbolosGeraAMEM(VarType tipo);
-void configuraParametrosFormaisPorValor();
-void configuraParametrosFormaisPorReferencia();
-void atualizaTipoNivelLexicoDaFuncao(VarType tipo);
-void adicionaTipoAosParametrosFormais(VarType tipo);
-void atualizaNivelLexicoDosParametrosFormais();
 void verificaFuncaoOuVariavel();
 void empilhaTipo(char* nome, VarType tipo);
 int desempilhaTipo();
@@ -71,22 +68,36 @@ void printPilhaTipos();
 void printTabelaDeSimbolos();
 
 /* ==================
- * == ROTULOS ======= */
+ * == SUBROTINAS ==== */
+void geraInstrucaoRTPR();
+void validaParametroPorValorOrDie();
+void handleChamadaDeSubrotina() ;
+void carregaParametroRealEmpilhaTipo(Symbol simbolo);
+void handleNovoProcedimento(char* nomeProcedimento);
+void handleNovaFuncao(char* nomeFuncao);
+void configuraChamadaSubrotina();
+void configuraChamadaFuncao();
+void handleNovoParametroReal();
+void configuraParametrosFormaisPorValor();
+void configuraParametrosFormaisPorReferencia();
+void atualizaTipoNivelLexicoDaFuncao(VarType tipo);
+void adicionaTipoAosParametrosFormais(VarType tipo);
+void atualizaNivelLexicoDosParametrosFormais();
+
+/* ==================
+ * == DESVIOS ======= */
 void iniciaRotulos();
 int novoRotulo();
 void empilhaRotulo(int rotulo);
 int rotuloNoTopoDaPilha();
 int desempilhaRotulo();
-void printPilhaRotulos();
-void finalizaRotulos();
-
-/* ==================
- * == DESVIOS ======= */
 void handleWhile();
 void avaliaExpressaoWhile();
 void handleFimWhile();
 void avaliaExpressaoIf();
 void handleSaidaIfThen();
 void handleFimIf();
+void printPilhaRotulos();
+void finalizaRotulos();
 
 #endif

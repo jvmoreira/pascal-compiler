@@ -9,4 +9,12 @@ typedef enum {
   s_virgula, s_ponto, s_abre_parenteses, s_fecha_parenteses, s_identificador
 } Simbolos;
 
+typedef struct {
+  int atual;
+  int rotulo;
+  int numeroDeVariaveis;
+  int numeroDeSubrotinas;
+  int numeroDeParametros;
+} Escopo;
+
 #endif

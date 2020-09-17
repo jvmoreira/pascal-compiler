@@ -1,5 +1,34 @@
 #include "libmepa.h"
 
+int proximoRotulo;
+Stack pilhaRotulos;
+
+void iniciaRotulos() {
+  proximoRotulo = 0;
+  pilhaRotulos = newStackWithType(VALUE);
+}
+
+int novoRotulo() {
+  return proximoRotulo++;
+}
+
+void empilhaRotulo(int rotulo) {
+  StackValue value = newStackValue("ROTULO", rotulo);
+  stackInsertValue(pilhaRotulos, value);
+}
+
+int rotuloNoTopoDaPilha() {
+  StackValue rotulo = extractStackValue(pilhaRotulos->top);
+  if(!rotulo)
+    geraErro("#rotuloNoTopoDaPilha");
+
+  return rotulo->value;
+}
+
+int desempilhaRotulo() {
+  return desempilhaIntDaPilha(pilhaRotulos, "#desempilhaRotulo");
+}
+
 void handleWhile() {
   int rotuloInicioWhile = novoRotulo();
   int rotuloFimWhile = novoRotulo();
@@ -52,4 +81,12 @@ void handleFimIf() {
   int rotuloFimIf = desempilhaRotulo();
   desempilhaRotulo();
   geraInstrucaoUnicaComRotulo("NADA", rotuloFimIf);
+}
+
+void printPilhaRotulos() {
+  printPilha(pilhaRotulos, "PILHA DE ROTULOS");
+}
+
+void finalizaRotulos() {
+  destroyStack(pilhaRotulos);
 }
