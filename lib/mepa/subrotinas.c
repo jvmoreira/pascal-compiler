@@ -185,6 +185,9 @@ void carregaParametroRealEmpilhaTipo(Symbol simbolo) {
   int simboloPassadoPorReferencia = simbolo->category == CAT_PARAM_REF;
   int deveCarregarEndereco = passagemPorReferencia && !simboloPassadoPorReferencia;
 
+  if(deveCarregarEndereco && simbolo->category == CAT_CONST)
+    geraErro("Constante nao pode ser passada como referencia");
+
   char *instrucao = deveCarregarEndereco ? "CREN" : "CRVL";
   empilhaTipo(simbolo->name, passagemPorReferencia ? TYPE_ADDR : simbolo->type);
 

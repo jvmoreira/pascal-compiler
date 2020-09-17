@@ -134,6 +134,13 @@ void handleNovaVariavel(char* nomeVariavel) {
   stackInsertSymbol(tabelaDeSimbolos, variavel);
 }
 
+void handleNovaConstante(char* nomeConstante) {
+  adicionaInstrucaoAMEM(1);
+  handleNovaVariavel(nomeConstante);
+  salvaLValueOrDie(nomeConstante);
+  LValue->category = CAT_CONST;
+}
+
 void handleNegaBool() {
   empilhaTipo("NEGA", TYPE_BOOL);
   validaTipoAplicaOperacao("NEGA", TYPE_BOOL);
@@ -231,12 +238,22 @@ void geraInstrucaoArmazena() {
 }
 
 void armazenaResultadoEmLValue() {
+  if(LValue->category == CAT_CONST)
+    geraErro("Constante nao pode ter seu valor alterado");
+
   int tipoResultado = desempilhaTipo();
 
   if(tipoResultado != (int)LValue->type)
     geraErro("Atribuicao com tipos incompativeis");
 
   geraInstrucaoArmazena();
+}
+
+// Ao armazenar o valor da constante
+// o simbolo referente a ela ja esta em LValue
+void armazenaResultadoEmConstante() {
+  geraInstrucaoArmazena();
+  LValue->type = desempilhaTipo();
 }
 
 int validaTipoOperacao() {
