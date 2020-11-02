@@ -69,6 +69,7 @@ void printTabelaDeSimbolos();
 
 /* ==================
  * == SUBROTINAS ==== */
+void iniciaSubrotinas();
 void geraInstrucaoRTPR();
 void validaParametroPorValorOrDie();
 void handleChamadaDeSubrotina() ;
@@ -83,6 +84,7 @@ void configuraParametrosFormaisPorReferencia();
 void atualizaTipoNivelLexicoDaFuncao(VarType tipo);
 void adicionaTipoAosParametrosFormais(VarType tipo);
 void atualizaNivelLexicoDosParametrosFormais();
+void finalizaSubrotinas();
 
 /* ==================
  * == DESVIOS ======= */

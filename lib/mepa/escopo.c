@@ -29,6 +29,7 @@ void iniciaEscopo() {
   escopo.numeroDeParametros = 0;
 
   iniciaPilhas();
+  iniciaSubrotinas();
 }
 
 void iniciaNovoEscopo() {
@@ -310,6 +311,7 @@ void destroiPilhas() {
 
 void destroiTodosEscopos() {
   destroiPilhas();
+  finalizaSubrotinas();
 }
 
 void printPilha(Stack pilha, char* nomePilha) {

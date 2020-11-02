@@ -1,9 +1,11 @@
 #include "../include/libmepa.h"
 
-Symbol subrotinaSendoChamada;
+Symbol subrotinaSendoChamada = 0;
 int parametrosEmpilhados = 0;
 int chamadaDeSubrotinaOcorrendo = 0;
 SymbolCategory categoriaParametrosFormais;
+Stack pilhaParametrosEmpilhados;
+Stack pilhaSubrotinasSendoChamadas;
 
 void geraInstrucaoENPR() {
   geraInstrucaoComRotulo("ENPR", simboloGlobal->label);
@@ -130,6 +132,11 @@ void adicionaTipoAosParametrosFormais(VarType tipo) {
 // == Parametros Reais ============================
 // ================================================
 
+void iniciaSubrotinas() {
+  pilhaParametrosEmpilhados = newStackWithType(VALUE);
+  pilhaSubrotinasSendoChamadas = newStackWithType(SYMBOL);
+}
+
 Parameter parametroAtual() {
   Parameter param = subrotinaSendoChamada->parameters;
 
@@ -144,12 +151,15 @@ Parameter parametroAtual() {
 
 void validaParametroPorValorOrDie() {
   if(parametroAtual()->category != CAT_PARAM_VAL)
-  geraErro("Parametro passado por referencia nao pode ser constante");
+    geraErro("Parametro passado por referencia nao pode ser constante");
 }
 
 void configuraChamadaSubrotina() {
   chamadaDeSubrotinaOcorrendo = 1;
+  stackInsertSymbol(pilhaSubrotinasSendoChamadas, subrotinaSendoChamada);
   subrotinaSendoChamada = simboloGlobal;
+  stackInsertValue(pilhaParametrosEmpilhados, newStackValue("nParamEmp", parametrosEmpilhados));
+  parametrosEmpilhados = 0;
 }
 
 void configuraChamadaFuncao() {
@@ -175,8 +185,9 @@ void handleChamadaDeSubrotina() {
     empilhaTipo("Func", subrotinaSendoChamada->type);
 
   geraInstrucaoCHPR();
-  parametrosEmpilhados = 0;
-  chamadaDeSubrotinaOcorrendo = 0;
+  parametrosEmpilhados = desempilhaIntDaPilha(pilhaParametrosEmpilhados, "#pilhaParametrosEmpilhados");
+  subrotinaSendoChamada = stackPopSymbol(pilhaSubrotinasSendoChamadas);
+  chamadaDeSubrotinaOcorrendo = !!subrotinaSendoChamada;
 }
 
 void carregaParametroRealEmpilhaTipo(Symbol simbolo) {
@@ -192,4 +203,10 @@ void carregaParametroRealEmpilhaTipo(Symbol simbolo) {
   geraArgumentoInteiro(simbolo->lexicalLevel);
   geraArgumentoInteiro(simbolo->shift);
   commitInstrucao();
+}
+
+void finalizaSubrotinas() {
+  destroyStack(pilhaParametrosEmpilhados);
+  pilhaSubrotinasSendoChamadas->top = 0;
+  destroyStack(pilhaSubrotinasSendoChamadas);
 }
