@@ -1,0 +1,79 @@
+Na implementação deste trabalho, tentamos deixa-lo o mais simples e objetivo possível, separando a estrutura do compilador em arquivos bem específicos, organizando em diretórios e focando o funcionamento do compilador em handlers que são funções onde a regra do compilador é tratada, e assim deixando a parte do analisador léxico mais simples.
+
+A hierarquia de arquivos é a seguinte:
+
+/compilador.l      - Arquivo Flex
+/compilador.y      - Arquivo Bison
+/lib/include       - Headers da libmepa.a
+/lib/stack         - Arquivos fonte das estruturas usadas para a pilha
+/lib/mepa          - Arquivos fonte usados no arquivo Bison para gerar as instruções MEPA
+
+. . .
+
+===============
+== Escopo =====
+
+O compilador trata o programa e as subrotinas como um escopo que possui as seguintes propriedades:
+
+Escopo.atual - Nível léxico do escopo corrente
+Escopo.rotulo - Rótulo do escopo corrente (utilizado apenas com subrotinas)
+Escopo.numeroDeVariaveis - Número de variáveis declaradas no escopo correspondente
+Escopo.numeroDeSubrotinas - Número de subrotinas declaradas no escopo correspondente
+Escopo.numeroDeParametros - Número de parâmetros do escopo correspondente (utilizado apenas com subrotinas)
+(Estrutura Escopo definida em /lib/include/types/mepa.h)
+
+O gerênciamento dessas informações é feito através das pilhas (estruturas das pilhas é explicado abaixo):
+Stack tabelaDeSimbolos;
+Stack pilhaVariaveis;
+Stack pilhaSubrotinas;
+Stack pilhaParametros;
+
+No ínicio da execução do compilador, é chamada a função iniciaEscopo() que inicia o escopo do programa principal e inicia os rótulos.
+
+Ao ler uma variável local, o compilador utiliza o handler handleNovaVariavel(nomeVariavel) para validar se a seu nome é valido no escopo atual (evitando redefinicao de símbolos), incrementa o número de variáveis do escopo atual e a salva empilhando na tabela de símbolos.
+Após ler o tipo das variáveis previamente lidas, é utilizado o handler adicionaTipoAosSimbolosGeraAMEM(tipo) para atualizar o tipo delas e gerar uma instrução de AMEM de acordo com o número de variáveis declaradas até ali.
+Após a leitura das variáveis adiciona-se um DSVS para o rótulo do escopo atual, evitando que entre nas subrotinas, se existirem.
+
+Ao ler uma nova subrotina, o compilador utiliza os handlers handleNovoProcedimento(nomeProced) e handleNovaFuncao(nomeFuncao) para validar seu nome no escopo atual, incrementar o número de subrotinas no escopo atual, gerar uma entrada na tabela de símbolos, gerar a instrução de ENPR e iniciar um novo escopo para a subrotina. A tradução do restante de uma subrotina ocorre da mesma forma que do programa principal, utilizando seu próprio escopo.
+A leitura da lista de parâmetros ocorre com o handleNovoParametroFormal(nomeParam) que, similarmente, ao ler um parâmetro valida seu nome e adiciona-os na tabela de símbolos, adicionando a categoria correta (por valor ou por referência). Para gerenciar os parâmetros por referência e por valor são utiliadas as funções configuraParametrosFormaisPorValor() configuraParametrosFormaisPorReferencia(), dependendo se houver `var` na frente deles.
+Ao ler o tipo dos parâmetros chama-se atualizaNivelLexicoDosParametrosFormais() para atualizá-los e, após o fim da lista, chama-se atualizaNivelLexicoDosParametrosFormais() para atualizar o deslocamento, começando no último parâmetro (que está no topo da tabela de símbolos) com nível léxico -4.
+Para funções, é feita a leitura do tipo da função, atualizando-a chamando atualizaTipoNivelLexicoDaFuncao(tipo), que também atualiza seu deslocamento baseado nos parâmetros.
+
+A tradução dos comandos é feita com a ajuda das variáveis globais simboloGlobal, LValue e subrotinaSendoChamada, todos do tipo Symbol (descrito abaixo).
+Ao se ler um símbolo que terá de ser referenciado posteriormente, ele é salvo em simboloGlobal.
+Ao se ler uma atribuição, salva-se simboloGlobal como LValue, para que possam ser lidas outros símbolos e, se necessário, salvar novos valores em simboloGlobal.
+Ao se iniciar o chamamento de uma subrotina, salva-se simboloGlobal em subrotinaSendoChamada, a qual é utilizada para verificação de parâmetros.
+
+Os tipo são controlados utilizando uma pilha chamada pilhaTipos. Após a leitura de um símbolo ou de constante, empilha-se o respectivo tipo nessa tabela e, em toda operação, é feito o desempilhamento para ser verificado.
+Atenta-se também se o que está sendo lido é um parâmetro real, caso seja, verifica-se se é por referência ou valor, impedindo de passar  constantes e operações no caso de ser referência.
+A função carregaValorEmpilhaTipo(nomeSimbolo) se encarrega de validar que o símbolo existe e gerar CRVL ou CRVI (no caso de parâmetro formal por referência.) Caso seja um parâmetro real, chama carregaParametroRealEmpilhaTipo(nomeSimbolo) que se encarrega de verificar se a instrução necessária é CRVL ou CREN. Em ambas é feito o empilhamento do tipo do valor que foi adicionado.
+
+Na atribuição, é feita a verificação do tipo que está no topo da pilha de tipos corresponde ao tipo de LValue, gerando erro em caso negativo. A função armazenaResultadoEmLValue() se encarrega dessa verificação e de gerar a instrução ARMI ou ARMZ, dependendo se LValue é parâmetro formal por referência ou não.
+
+Na chamada de subrotinas, a funcão configuraChamadaSubrotina() salva o simboloGlobal em subrotinaSendoChamada. No caso de ser uma função, configuraChamadaFuncao() gera AMEM 1 para guardar seu retorno e chama a configuraChamadaSubrotina().
+Após isso, empilha-se os parâmetros reais, verificando o tipo de cada um deles com a lista de parâmetros da variável global subrotinaSendoChamada. Validados todos os parâmetros, a função handleChamadaDeSubrotina() gera a instrução CHPR para o rótulo de subrotinaSendoChamada.
+
+Comandos if e while utilizam a pilha de rótulos para fazer os desvios corretamente e a pilha de tipos para avaliar se a expressão passada é do tipo booleano.
+
+. . .
+
+===============
+== Pilhas =====
+
+O compilador utiliza diversas pilhas para manter o controle da situação do Escopo atual.
+As estruturas de dados das pilhas estão definidas em /lib/include/types/stack.h
+
+Uma pilha (estrutura Stack) pode ter dois tipos: Value ou Symbol. O primeiro é uma estrutura de dados de chave/valor, já o segundo utilizado para referenciar os símbolos do programa pascal a ser compilado, cujos atributos são descritos a seguir:
+
+Symbol.name - Nome do símbolo
+Symbol.category - categoria do símbolo (variável simples, parâmetro formal, procedimento, etc...)
+Symbol.type - tipo do símbolo, para os que se aplicam (var simples, parametro e função)
+  Pode ter os seguintes valores [TYPE_NULL, TYPE_UNDEFINED, TYPE_INT, TYPE_BOOL, TYPE_ADDR]
+Symbol.lexicalLevel - Nível léxico do símbolo
+Symbol.shift - descolocamento do símbolo
+Symbol.label - rótulo do símbolo, utilizado para as subrotinas
+Symbol.numberOfParameters - número de parâmetros, utilizado nas subrotinas
+Symbol.parameters - lista de parâmetros, utilizado nas subrotinas
+
+A estrutura de itens (StackItem) utiliza uma union para acessar o seu conteúdo, que pode ser um StackValue ou Symbol.
+A estrutura Parameter representa uma lista ligada com os atributos para tipo e categoria do parametro.

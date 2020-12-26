@@ -1,0 +1,13 @@
+A modificação para adicionar constantes foi simples e não houveram muitos problemas para fazer funcionar.
+
+Primeiro adicionou-se `const` como o token CONST para permitir a diferenciação na leitura e uma nova categoria para a estrutura Symbol.
+
+Com isso, adicionou-se as regras para incluir a definição de constantes na gramática, chamando handleNovaConstante(), que aloca memória para a constante com AMEM 1, chama handleNovaVariavel(nomeConstante) que por sua vez já faz a validação do nome no escopo atual, incrementa o número de variáveis (para permitir a desalocação posteriormente) e adiciona na tabela de símbolos. Após isso, o símbolo da constante é salvo como LValue (para atrubuir o valor posteriormente) e marcado com a categoria CONST.
+
+Após a leitura da expressão e do sinal de igual chama-se a função armazenaResultadoEmConstante(nomeConstante), a qual é a única que permite atribuir valor a uma constante. Que gera a instrução ARMZ e desempilha o tipo, previamente empilhado pela expressão.
+
+Para evitar atribuição a uma constante durante a execução do programa, adicionou-se uma verificação na função armazenaResultadoEmLValue(), de modo que se a categoria de LValue for CONST, um erro é gerado para o usuário.
+
+Ainda, para evitar que constantes sejam passadas como referência em subrotinas, adicionou-se também a validação na função carregaParametroRealEmpilhaTipo(simbolo), de forma que se o parâmetro real for por referência e o símbolo tiver a categoria de constante, um erro é gerado para o usuário.
+
+Por fim, também foi deixado opcional a lista de identificadores do nome do programa (Ex: program programaExemplo;) e adicionado `writeln` como token WRITE (também usando por `write`) para o funcionamento dos arquivos de teste sem necessidade de alterações.

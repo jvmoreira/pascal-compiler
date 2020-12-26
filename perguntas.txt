@@ -1,0 +1,33 @@
+##Principais dificuldades ao longo do desenvolvimento
+Para construir o compilador em si não houveram maiores dificuldades, visto que grande parte do conhecimento necessário obtivemos na disciplina de ITC, e grande parte do conteúdo para a construção se encontra no livro e nas vídeos-aula desta disciplina. Grande parte dos problemas que enfrentamos durante o trabalho foi pela nossa implementação em C de funções que eram usadas pelo compilador, como a estrutura de pilha que criamos e tivemos dificuldade com `Segmentation Fault` etc. Além disso a implementação de chamadas de procedimento e funções se tornaram um pouco mais complexas (pela diferença em relação ao resto do compilador), especificamente quando a lista de parâmetros era diferente do habitual, como uma função sem parâmetros, onde precisávamos distingui-lá entre uma variável e função de fato, e tratar de um jeito específico.
+
+.	.	.
+
+###Como alterar o seu compilador para que ele imprima as seguintes informações:
+
+##Lista de variáveis que foram referenciadas antes de serem inicializadas
+
+- Devemos alterar a estrutura de dados que representa os Símbolos (arquivo lib/include/types/stack.h), chamada struct Symbol, adicionando um atributo à estrutura do tipo booleando definido como `isInitialized` (para saber se a variável foi inicializada) e outro do tipo inteiro definido como `useCount` (para saber quantas refências a variável tem).
+- Na criação do símbolo a variável `isInitialized` tem o valor padrão `false` e a variável `useCount` com o valor padrão 0.
+- Quando houver uma instrução de escrita de algum símbolo, ele verifica se o `useCount` é 0, e se for, atualiza o `isInitialized` para `true`. Para isso podemos usar a função `armazenaResultadoEmLValue()`, que é responsável por todas as atribuições.
+- Em toda instrução que faz operação de leitura em algum símbolo, ele incrementa o `useCount` desta variável em 1, caso o `isInitialized` seja `false`, significa que a variável ainda não foi inicializada e podemos gerar um warning para informar o usuário.
+- Para resgatar o símbolo relacionado à leitura/escrita, utilizamos a variável `simboloGlobal`, ela irá apontar para o símbolo correspondente à variável com que estamos trabalhando na operação.
+
+.	.	.
+
+
+##Lista de procedimentos e funções que não foram chamados
+
+- Usamos o atributo `useCount` previamente definido na questão anterior, na estrutura do símbolo (Symbol).
+- Sempre que um procedimento ou função é chamado incrementamos o `useCount` em 1. Para isso podemos utilizar a handler definida no `escopo.c` definida por `handleChamadaDeSubrotina()`.
+- Para resgatar o símbolo correspondente à uma chamada, utilizamos a variável `simboloGlobal`, ela irá apontar para a procedure/function com que estamos trabalhando.
+- Ao final, verificamos se os símbolos de procedure e function tem o `useCount` maior que 0, caso não tenha, significa que a procedure/function foi declarada e nunca foi chamada. Esta verificação deve ser feita ao final de cada escopo, que é tratado na handler `handleSaidaEscopo()` e é responsável por chamar a funçao `removeSubrotinasLocaisTabelaSimbolos`.
+-  Na função `removeSubrotinasLocaisTabelaSimbolos()`, são removidos da tabela de símbolos os símbolos referentes às subrotinas, e nela podemos verificar se o símbolo teve um `useCount` maior que 0 ou não. Se não teve, significa que a procedure/function nunca foi chamada e podemos gerar um warning para o usuário.
+
+.	.	.
+
+
+##Lista de procedimentos e funções que não podem ser chamados porque não há um caminho do programa principal até eles
+
+- A ideia para essa modificação é construir um grafo de sub-rotinas, para que o caminho de cada sub-rotina possa ser identificado e consequentemente verificado se foi chamado ou não. Para isso, seriam adicionadas arestas do programa principal para as subrotinas de nível léxico 1, que ele chama, das subrotinas de nível léxico 1 para as de 2 que forem chamadas e assim por diante. Com o grafo montado, se houver algum vértice isolado, significa que aquele procedimento/funcão não foi chamado por ninguém e que não existe um caminho para se chegar até ele, assim podemos gerar uma mensagem para o usuário.
+- Para realizar essa alteração, precisaríamos adicionar uma estrutura de dados para representar um grafo.
